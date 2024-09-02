@@ -9,7 +9,10 @@ SRCS = \
 	drivers/rpi4b/devices.c \
 	drivers/rpi4b/rpi4os_uart.c 
 
-OBJS = $(SRCS:%=%.o)
+OBJS = $(SRCS:%=compile/%.o)
+
+DIRS = $(sort $(dir $(SRCS)))
+DIRS := $(DIRS:%=compile/%)
 
 LINK = kern/arch/aarch64/link.ld
 
@@ -19,14 +22,18 @@ kernel8.img: kernel8.elf
 kernel8.elf: $(OBJS)
 	$(CC) $^ -o $@ -ffreestanding -nostdlib -T $(LINK)
 
-%.c.o: %.c
+compile/%.c.o: %.c | $(DIRS)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-%.S.o: %.S
+compile/%.S.o: %.S | $(DIRS)
 	$(CC) -c $< -o $@ -ffreestanding
 
+$(DIRS):
+	mkdir -p $@
+
 clean:
-	find . -name "*.o" -exec rm {} \;
+#	find . -name "*.o" -exec rm {} \;
+	rm -rf compile
 	rm -f kernel8.img
 	rm -f kernel8.elf
 
