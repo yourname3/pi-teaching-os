@@ -1,13 +1,14 @@
 include .config
 
-CFLAGS = -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall
+CFLAGS = -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11
 
 # TODO: Machine-dependent makefile setup
 SRCS = \
 	kern/arch/aarch64/boot.S \
 	kern/main/main.c \
 	drivers/rpi4b/devices.c \
-	drivers/rpi4b/rpi4os_uart.c 
+	drivers/rpi4b/rpi4os_uart.c \
+	drivers/generic/con_vt100.c
 
 OBJS = $(SRCS:%=compile/%.o)
 
