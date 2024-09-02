@@ -1,4 +1,7 @@
 /.config
 
+*.o
+
 # TODO is this where we build the kernel?
-/kernel
+/kernel8.img
+/kernel8.elf
