@@ -5,7 +5,9 @@ CFLAGS = -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall
 # TODO: Machine-dependent makefile setup
 SRCS = \
 	kern/arch/aarch64/boot.S \
-	kern/main/main.c
+	kern/main/main.c \
+	drivers/rpi4b/devices.c \
+	drivers/rpi4b/rpi4os_uart.c 
 
 OBJS = $(SRCS:%=%.o)
 
@@ -29,6 +31,6 @@ clean:
 	rm -f kernel8.elf
 
 qemu: kernel8.img
-	$(QEMU) -machine raspi4b -kernel kernel8.img
+	$(QEMU) -machine raspi4b -kernel kernel8.img -serial null -serial stdio
 
 .PHONY: clean qemu

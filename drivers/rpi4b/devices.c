@@ -30,7 +30,10 @@
  * This function will load all the drivers we want to provide to the system.
  */
 
+extern void uart_writeText(const char *buffer);
+extern void (*textwrite)(const char*);
+
 void
 load_devices() {
-    
+    textwrite = uart_writeText;
 }
