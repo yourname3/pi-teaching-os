@@ -1,1 +1,4 @@
 /.config
+
+# TODO is this where we build the kernel?
+/kernel
