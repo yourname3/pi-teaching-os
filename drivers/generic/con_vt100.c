@@ -22,7 +22,11 @@ static bool
 vt100_init(void *user_data) {
     con_vt100 *vt = user_data;
 
-    return vt->vt100_init(vt->user_data);
+    if(vt->vt100_init) {
+        return vt->vt100_init(vt->user_data);
+    }
+
+    return true;
 }
 
 static void
@@ -59,12 +63,12 @@ vt100_clear_line(void *user_data) {
 }
 
 static void
-vt100_cursor_left(void *user_data) {
+vt100_cursor_left(int columns, void *user_data) {
 
 }
 
 static void
-vt100_cursor_right(void *user_data) {
+vt100_cursor_right(int columns, void *user_data) {
 
 }
 
@@ -75,5 +79,16 @@ vt100_backspace(void *user_data) {
 
 void
 create_vt100_console_attachment(console_io_attach *io, con_vt100 *vt100) {
+    io->con_init = vt100_init;
+    io->con_putc = vt100_putc;
+    io->con_poll = vt100_poll;
+    
+    io->con_clear = vt100_clear;
+    io->con_clear_line = vt100_clear_line;
+    io->con_cursor_left = vt100_cursor_left;
+    io->con_cursor_right = vt100_cursor_right;
+    io->con_backspace = vt100_backspace;
 
+    /* We track the inner set of functions using the user data pointer. */
+    io->user_data = vt100;
 }

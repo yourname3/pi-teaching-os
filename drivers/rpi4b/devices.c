@@ -30,10 +30,18 @@
  * This function will load all the drivers we want to provide to the system.
  */
 
-extern void uart_writeText(const char *buffer);
-extern void (*textwrite)(const char*);
+extern void uart_writeByteBlockingActual(char ch, void *unused);
+
+#include <kern/console/console.h>
+#include <drivers/generic/con_vt100.h>
+
+con_vt100 miniuart = {
+    .vt100_putc = uart_writeByteBlockingActual
+};
+console_io_attach miniuart_console = {0};
 
 void
 load_devices() {
-    textwrite = uart_writeText;
+    create_vt100_console_attachment(&miniuart_console, &miniuart);
+    console_attach(&miniuart_console);
 }

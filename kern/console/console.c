@@ -4,9 +4,20 @@ static console_io_attach *console_root = NULL;
 
 void
 console_attach(console_io_attach *attachment) {
+    if(!attachment->con_init) {
+        attachment->con_init = dummy_init;
+    }
+
     /* If the attachment can't initialize, don't attach it. */
     if(!attachment->con_init(attachment->user_data)) {
         return;
+    }
+
+    if(!attachment->con_poll) {
+        attachment->con_poll = dummy_poll;
+    }
+    if(!attachment->con_putc) {
+        attachment->con_putc = dummy_putc;
     }
 
     /* Add the attachment to the linked list. */
@@ -45,3 +56,7 @@ console_getc(char* out) {
     }
     return false;
 }
+
+bool dummy_init(void *user_data) { return true; }
+void dummy_putc(char c, void *user_data) { }
+bool dummy_poll(con_poll_result *out, void *user_data) { return false; }

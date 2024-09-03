@@ -89,14 +89,14 @@ void uart_init() {
 
 unsigned int uart_isWriteByteReady() { return mmio_read(AUX_MU_LSR_REG) & 0x20; }
 
-void uart_writeByteBlockingActual(unsigned char ch) {
+void uart_writeByteBlockingActual(char ch, void *unused) {
     while (!uart_isWriteByteReady()); 
     mmio_write(AUX_MU_IO_REG, (unsigned int)ch);
 }
 
-void uart_writeText(const char *buffer) {
-    while (*buffer) {
-       if (*buffer == '\n') uart_writeByteBlockingActual('\r');
-       uart_writeByteBlockingActual(*buffer++);
-    }
-}
+//void uart_writeText(const char *buffer) {
+//    while (*buffer) {
+//       if (*buffer == '\n') uart_writeByteBlockingActual('\r');
+//       uart_writeByteBlockingActual(*buffer++);
+//    }
+//}

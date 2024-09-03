@@ -1,6 +1,4 @@
-
-/* Loaded by devices.c */
-void (*textwrite)(const char*);
+#include <kern/console/console.h>
 
 void load_devices();
 
@@ -11,7 +9,7 @@ void
 main() {
     load_devices();
 
-    textwrite("Hello, world!");
+    console_putstr("Hello, world!");
 
     for(;;) {}
 }
