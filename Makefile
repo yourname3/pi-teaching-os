@@ -19,19 +19,24 @@ DIRS := $(DIRS:%=compile/%)
 LINK = kern/arch/aarch64/link.ld
 
 kernel8.img: kernel8.elf
-	$(OBJCOPY) -O binary $< $@
+	@$(OBJCOPY) -O binary $< $@
+	@echo "OBJCOPY $<"
 
 kernel8.elf: $(OBJS)
-	$(CC) $^ -o $@ -ffreestanding -nostdlib -T $(LINK)
+	@$(CC) $^ -o $@ -ffreestanding -nostdlib -T $(LINK)
+	@echo "LD      $<"
 
 compile/%.c.o: %.c | $(DIRS)
-	$(CC) -c $< -o $@ $(CFLAGS)
+	@$(CC) -c $< -o $@ $(CFLAGS)
+	@echo "CC      $<"
 
 compile/%.S.o: %.S | $(DIRS)
-	$(CC) -c $< -o $@ -ffreestanding
+	@$(CC) -c $< -o $@ -ffreestanding
+	@echo "AS      $<"
 
 $(DIRS):
-	mkdir -p $@
+	@mkdir -p $@
+	@echo "MKDIR   $@"
 
 clean:
 #	find . -name "*.o" -exec rm {} \;
