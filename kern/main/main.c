@@ -9,7 +9,7 @@ void
 main() {
     load_devices();
 
-    console_putstr("Hello, world!");
+    for(int i = 0; i < 20; ++i) { console_putstr("Hello, world!"); }
 
     for(;;) {}
 }
