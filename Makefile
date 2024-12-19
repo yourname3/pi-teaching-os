@@ -5,6 +5,10 @@ CFLAGS = -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I
 # TODO: Machine-dependent makefile setup
 SRCS = \
 	kern/arch/aarch64/boot.S \
+	kern/arch/aarch64/switch.S \
+	kern/arch/aarch64/pcb.c \
+	kern/mem/mem.c \
+	kern/task/task.c \
 	kern/main/main.c \
 	kern/console/console.c \
 	kern/console/menu.c \
