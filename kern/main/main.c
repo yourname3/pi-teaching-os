@@ -1,4 +1,5 @@
 #include <kern/console/console.h>
+#include <kern/console/menu.h>
 
 void load_devices();
 
@@ -9,7 +10,9 @@ void
 main() {
     load_devices();
 
-    for(int i = 0; i < 20; ++i) { console_putstr("Hello, world!"); }
+    menu();
+
+    //for(int i = 0; i < 20; ++i) { console_putstr("Hello, world!"); }
 
     for(;;) {}
 }

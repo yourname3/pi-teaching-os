@@ -7,6 +7,7 @@ SRCS = \
 	kern/arch/aarch64/boot.S \
 	kern/main/main.c \
 	kern/console/console.c \
+	kern/console/menu.c \
 	drivers/rpi4b/devices.c \
 	drivers/rpi4b/rpi4os_uart.c \
 	drivers/generic/con_vt100.c

@@ -6,6 +6,8 @@
 
 // GPIO
 
+#include <kern/types.h>
+
 enum {
     PERIPHERAL_BASE = 0xFE000000,
     GPFSEL0         = PERIPHERAL_BASE + 0x200000,
@@ -92,6 +94,18 @@ unsigned int uart_isWriteByteReady() { return mmio_read(AUX_MU_LSR_REG) & 0x20; 
 void uart_writeByteBlockingActual(char ch, void *unused) {
     while (!uart_isWriteByteReady()); 
     mmio_write(AUX_MU_IO_REG, (unsigned int)ch);
+}
+
+unsigned int uart_isReadByteReady()  { return mmio_read(AUX_MU_LSR_REG) & 0x01; }
+
+bool uart_readByte(char *out, void *unused) {
+    if(uart_isReadByteReady()) {
+        *out = (char)mmio_read(AUX_MU_IO_REG);
+        return true;
+    }
+    return false;
+   // while (!uart_isReadByteReady());
+   // return (unsigned char)mmio_read(AUX_MU_IO_REG);
 }
 
 //void uart_writeText(const char *buffer) {

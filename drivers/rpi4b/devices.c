@@ -30,13 +30,17 @@
  * This function will load all the drivers we want to provide to the system.
  */
 
-extern void uart_writeByteBlockingActual(char ch, void *unused);
+
 
 #include <kern/console/console.h>
 #include <drivers/generic/con_vt100.h>
 
+extern void uart_writeByteBlockingActual(char ch, void *unused);
+extern bool uart_readByte(char *out, void *unused);
+
 con_vt100 miniuart = {
-    .vt100_putc = uart_writeByteBlockingActual
+    .vt100_putc = uart_writeByteBlockingActual,
+    .vt100_poll = uart_readByte,
 };
 console_io_attach miniuart_console = {0};
 

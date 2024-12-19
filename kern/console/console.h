@@ -64,6 +64,8 @@ void console_putc(char c);
 void console_putstr(char *str);
 bool console_getc(char*);
 
+bool console_poll(con_poll_result *out);
+
 bool dummy_init(void *user_data);
 void dummy_putc(char c, void *user_data);
 bool dummy_poll(con_poll_result *out, void *user_data);

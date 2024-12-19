@@ -57,6 +57,20 @@ console_getc(char* out) {
     return false;
 }
 
+bool
+console_poll(con_poll_result *out) {
+    console_io_attach *con = console_root;
+    con_poll_result poll;
+
+    while(con) {
+        if(con->con_poll(&poll, con->user_data)) {
+            if(out) *out = poll;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool dummy_init(void *user_data) { return true; }
 void dummy_putc(char c, void *user_data) { }
 bool dummy_poll(con_poll_result *out, void *user_data) { return false; }
