@@ -1,10 +1,17 @@
 .section ".data.boot"
-_ttrb1_init:
-    .quad 1 | (1 << 10) | (3 << 8)
-    .zero 8 * 8191
 
-_ttrb0_init:
-    .zero 8 * 8192
+/* _init_pagetable_level1:
+    .quad 1 | (1 << 10) | (3 << 8)
+    .zero 8 * (512 - 1)
+
+_init_pagetable_level0:
+    .quad 3 | (1 << 10) | (3 << 8)
+    .zero 8 * (512 - 1) */
+
+_init_pagetable_level1:
+    .zero 8 * 512
+_init_pagetable_level0:
+    .zero 8 * 512
 
 .section .data
 _init_kstack:
@@ -34,12 +41,20 @@ _start:
     // essentially a separate memory map for both the high address and low
     // address.
 
-    ldr x0, =_ttrb0_init
-    ldr x1, =_ttrb1_init
-    ldr x2, =((0b101 << 32) | (3 << 30) | (22 << 16) | (3 << 14) | (22))
+    ldr x0, =0xFF
+    msr mair_el1, x0
+
+    ldr x0, =_init_pagetable_level1
+    ldr x1, _init_pagetable_level0
+    orr x1, x1, x1
+
+    ldr x0, =_init_pagetable_level0
+    str x1, [x0]
+   
+    ldr x2, =((0b101 << 32) | (2 << 30) | (3 << 28) | (1 << 26) | (1 << 24) | (16 << 16) | (0 << 14) | (3 << 12) | (1 << 10) | (1 << 8) | (16))
 
     msr ttbr0_el1, x0 // Set TTBR0
-    msr ttbr1_el1, x1 // Set TTBR1
+    msr ttbr1_el1, x0 // Set TTBR1
     msr tcr_el1, x2 // Set TCR
     isb // The ISB forces these changes to be
     // seen before the MMU is enabled.

@@ -21,7 +21,7 @@ OBJS = $(SRCS:%=compile/%.o)
 DIRS = $(sort $(dir $(SRCS)))
 DIRS := $(DIRS:%=compile/%)
 
-LINK = kern/arch/aarch64/link.ld
+LINK = kern/arch/aarch64/link_dumb.ld
 
 kernel8.img: kernel8.elf
 	@$(OBJCOPY) -O binary $< $@
