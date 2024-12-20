@@ -9,10 +9,10 @@
  */
 .macro define_entry id
 .align 7
-    sub sp, sp, #296
-    str x0, [sp, #280]
+    sub sp, sp, #288
+    str x0, [sp, #8]
     mov x0, #\id
-    str x0, [sp, #288]
+    str x0, [sp, #0]
     b finish_trap
 .endm
 
@@ -43,39 +43,21 @@ interrupt_vectors:
 finish_trap:
     /* store all the registers */
 
-    /* TODO: This layout is exactly reversed from what it is supposeod to be.
-     * Oops! */
-
-    str x1,  [sp, #0x110]
-    str x2,  [sp, #0x108]
-    str x3,  [sp, #0x100]
-    str x4,  [sp, #0xF8]
-    str x5,  [sp, #0xF0]
-    str x6,  [sp, #0xE8]
-    str x7,  [sp, #0xE0]
-    str x8,  [sp, #0xD8]
-    str x9,  [sp, #0xD0]
-    str x10, [sp, #0xC8]
-    str x11, [sp, #0xC0]
-    str x12, [sp, #0xB8]
-    str x13, [sp, #0xB0]
-    str x14, [sp, #0xA8]
-    str x15, [sp, #0xA0]
-    str x16, [sp, #0x98]
-    str x17, [sp, #0x90]
-    str x18, [sp, #0x88]
-    str x19, [sp, #0x80]
-    str x20, [sp, #0x78]
-    str x21, [sp, #0x70]
-    str x22, [sp, #0x68]
-    str x23, [sp, #0x60]
-    str x24, [sp, #0x58]
-    str x25, [sp, #0x50]
-    str x26, [sp, #0x48]
-    str x27, [sp, #0x40]
-    str x28, [sp, #0x38]
-    str x29, [sp, #0x30]
-    str x30, [sp, #0x28]
+    stp x1,  x2,  [sp, #16 * 1]
+    stp x3,  x4,  [sp, #16 * 2]
+    stp x5,  x6,  [sp, #16 * 3]
+    stp x7,  x8,  [sp, #16 * 4]
+    stp x9,  x10, [sp, #16 * 5]
+    stp x11, x12, [sp, #16 * 6]
+    stp x13, x14, [sp, #16 * 7]
+    stp x15, x16, [sp, #16 * 8]
+    stp x17, x18, [sp, #16 * 9]
+    stp x19, x20, [sp, #16 * 10]
+    stp x21, x22, [sp, #16 * 11]
+    stp x23, x24, [sp, #16 * 12]
+    stp x25, x26, [sp, #16 * 13]
+    stp x27, x28, [sp, #16 * 14]
+    stp x29, x30, [sp, #16 * 15]
     
     /* Get the esr, elr, spsr, and far registers.
      * TODO: These will probably be different for the el0 interrupts. */
@@ -85,53 +67,34 @@ finish_trap:
     mrs x3, far_el1
 
     /* Store the esr, elr, spsr, far registers. */
-    str x0, [sp, #0x20]
-    str x1, [sp, #0x18]
-    str x2, [sp, #0x10]
-    str x3, [sp, #0x08]
+    stp x0, x1, [sp, #16 * 16]
+    stp x2, x3, [sp, #16 * 17]
 
     /* The trapframe struct is pointed to by SP, put it in the first arg */
     mov x0, sp
-    /* Oops, it's actually off by 8 right now. */
-    add x0, x0, #8
     bl aarch64_trapentry
 
     /* restore all the registers */
 
     /* TODO: Store floating point registers. */
 
-    ldr x1,  [sp, #0x110]
-    ldr x2,  [sp, #0x108]
-    ldr x3,  [sp, #0x100]
-    ldr x4,  [sp, #0xF8]
-    ldr x5,  [sp, #0xF0]
-    ldr x6,  [sp, #0xE8]
-    ldr x7,  [sp, #0xE0]
-    ldr x8,  [sp, #0xD8]
-    ldr x9,  [sp, #0xD0]
-    ldr x10, [sp, #0xC8]
-    ldr x11, [sp, #0xC0]
-    ldr x12, [sp, #0xB8]
-    ldr x13, [sp, #0xB0]
-    ldr x14, [sp, #0xA8]
-    ldr x15, [sp, #0xA0]
-    ldr x16, [sp, #0x98]
-    ldr x17, [sp, #0x90]
-    ldr x18, [sp, #0x88]
-    ldr x19, [sp, #0x80]
-    ldr x20, [sp, #0x78]
-    ldr x21, [sp, #0x70]
-    ldr x22, [sp, #0x68]
-    ldr x23, [sp, #0x60]
-    ldr x24, [sp, #0x58]
-    ldr x25, [sp, #0x50]
-    ldr x26, [sp, #0x48]
-    ldr x27, [sp, #0x40]
-    ldr x28, [sp, #0x38]
-    ldr x29, [sp, #0x30]
-    ldr x30, [sp, #0x28]
+    ldp x1,  x2,  [sp, #16 * 1]
+    ldp x3,  x4,  [sp, #16 * 2]
+    ldp x5,  x6,  [sp, #16 * 3]
+    ldp x7,  x8,  [sp, #16 * 4]
+    ldp x9,  x10, [sp, #16 * 5]
+    ldp x11, x12, [sp, #16 * 6]
+    ldp x13, x14, [sp, #16 * 7]
+    ldp x15, x16, [sp, #16 * 8]
+    ldp x17, x18, [sp, #16 * 9]
+    ldp x19, x20, [sp, #16 * 10]
+    ldp x21, x22, [sp, #16 * 11]
+    ldp x23, x24, [sp, #16 * 12]
+    ldp x25, x26, [sp, #16 * 13]
+    ldp x27, x28, [sp, #16 * 14]
+    ldp x29, x30, [sp, #16 * 15]
 
     /* Free stack space allocated in 'define_entry' */
-    add sp, sp, #296
+    add sp, sp, #288
 
     eret
