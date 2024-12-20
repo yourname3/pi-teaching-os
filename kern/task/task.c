@@ -65,11 +65,18 @@ mi_switch() {
     /* Step 2: Call the scheduler */
     struct task *next = scheduler();
 
-    /* Step 3: Actually perform the context switch */
-    md_switch(&curtask->pcb, &next->pcb);
+    /* Step 3: Update curtask. We have to do this before the switch because
+     * new tasks will not return here and will not otherwise have a chance to 
+     * do it. */
 
-    /* Step 4: Update curtask */
+    struct task *prev = curtask;
     curtask = next;
+
+    /* Step 4: Actually perform the context switch */
+    md_switch(&prev->pcb, &curtask->pcb);
+
+    /* Note that if we are switching to a new thread, md_switch will not return
+     * here. So anything we do here must also be done in mi_task_startup. */
 }
 
 void

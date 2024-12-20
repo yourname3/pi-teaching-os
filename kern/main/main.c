@@ -29,7 +29,6 @@ main() {
     for(;;) {
         console_putc('a');
         task_yield();
-        console_putc('c');
     }
 
    // menu();
