@@ -43,6 +43,9 @@ interrupt_vectors:
 finish_trap:
     /* store all the registers */
 
+    /* TODO: This layout is exactly reversed from what it is supposeod to be.
+     * Oops! */
+
     str x1,  [sp, #0x110]
     str x2,  [sp, #0x108]
     str x3,  [sp, #0x100]
@@ -82,10 +85,10 @@ finish_trap:
     mrs x3, far_el1
 
     /* Store the esr, elr, spsr, far registers. */
-    str x27, [sp, #0x20]
-    str x28, [sp, #0x18]
-    str x29, [sp, #0x10]
-    str x30, [sp, #0x08]
+    str x0, [sp, #0x20]
+    str x1, [sp, #0x18]
+    str x2, [sp, #0x10]
+    str x3, [sp, #0x08]
 
     /* The trapframe struct is pointed to by SP, put it in the first arg */
     mov x0, sp
