@@ -1,16 +1,7 @@
 #include "pcb.h"
 
-#include <kern/types.h>
+#include <kern/lib.h>
 #include <kern/task/task.h>
-
-void
-memcpy(void *dest, const void *src, size_t bytes) {
-    char *dest_data = dest;
-    const char *src_data = src;
-    for(size_t i = 0; i < bytes; ++i) {
-        dest_data[i] = src_data[i];
-    }
-}
 
 void
 md_init_new_task_pcb(

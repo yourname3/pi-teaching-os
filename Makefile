@@ -1,6 +1,6 @@
 include .config
 
-CFLAGS = -MMD -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I. -Icompile/symlinks
+CFLAGS = -MMD -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I. -Icompile/symlinks -Ilib/libc
 
 # TODO: Machine-dependent makefile setup
 SRCS = \
@@ -14,9 +14,10 @@ SRCS = \
 	kern/console/menu.c \
 	drivers/rpi4b/devices.c \
 	drivers/rpi4b/rpi4os_uart.c \
-	drivers/generic/con_vt100.c
+	drivers/generic/con_vt100.c \
+	lib/libc/string.c 
 
-OBJS = $(SRCS:%=compile/%.o)
+OBJS = $(SRCS:%=compile/%.ko)
 
 DIRS = $(sort $(dir $(SRCS)))
 DIRS := $(DIRS:%=compile/%)
@@ -43,11 +44,11 @@ kernel8.elf: $(LINK) $(OBJS)
 	@$(CC) $(OBJS) -o $@ -ffreestanding -nostdlib -T $(LINK)
 	@echo "LD      $@"
 
-compile/%.c.o: %.c | $(DIRS) compile/symlinks/arch compile/symlinks/device
+compile/%.c.ko: %.c | $(DIRS) compile/symlinks/arch compile/symlinks/device
 	@$(CC) -c $< -o $@ $(CFLAGS)
 	@echo "CC      $<"
 
-compile/%.S.o: %.S | $(DIRS) compile/symlinks/arch compile/symlinks/device
+compile/%.S.ko: %.S | $(DIRS) compile/symlinks/arch compile/symlinks/device
 	@$(CC) -c $< -o $@ -g -ffreestanding
 	@echo "AS      $<"
 
@@ -72,4 +73,4 @@ gdb: kernel8.img
 
 .PHONY: clean qemu qemu-debug
 
--include $(OBJS:.o=.d)
+-include $(OBJS:.ko=.d)

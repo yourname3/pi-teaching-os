@@ -13,4 +13,7 @@ static inline _Noreturn void panic(const char *fmt, ...) { for(;;) { console_put
     } \
 } while(0)
 
+/* Include some important libc functions. */
+#include <string.h>
+
 #endif
