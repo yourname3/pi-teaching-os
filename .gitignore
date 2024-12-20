@@ -5,3 +5,5 @@
 # TODO is this where we build the kernel?
 /kernel8.img
 /kernel8.elf
+
+/compile
