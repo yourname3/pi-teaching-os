@@ -1,17 +1,15 @@
 .section ".data.boot"
 
-/* _init_pagetable_level1:
+.balign 0x1000
+_init_pagetable_level1:
     .quad 1 | (1 << 10) | (3 << 8)
     .zero 8 * (512 - 1)
 
+.balign 0x1000
 _init_pagetable_level0:
-    .quad 3 | (1 << 10) | (3 << 8)
-    .zero 8 * (512 - 1) */
-
-_init_pagetable_level1:
-    .zero 8 * 512
-_init_pagetable_level0:
-    .zero 8 * 4096
+    /* .quad 3 | (1 << 10) | (3 << 8) */
+    .quad 3
+    .zero 8 * (512 - 1)
 
 .section .data
 _init_kstack:
@@ -48,6 +46,7 @@ _start:
     blo     in_el0
     cmp     x0, 0b1000
     beq     in_el2
+    b       in_el3
 in_el0:
     b       .
 in_el3:
@@ -86,12 +85,12 @@ in_el1:
     msr mair_el1, x0
     isb
 
- /*   ldr x0, =_init_pagetable_level1
+    ldr x0, =_init_pagetable_level1
     ldr x1, _init_pagetable_level0
     orr x1, x1, x0
 
     ldr x0, =_init_pagetable_level0
-    str x1, [x0] */
+    str x1, [x0]
    
     ldr x0, =_init_pagetable_level0
     ldr x1, =((0b101 << 32) | (2 << 30) | (3 << 28) | (1 << 26) | (1 << 24) | (16 << 16) | (0 << 14) | (3 << 12) | (1 << 10) | (1 << 8) | (16))
@@ -108,10 +107,6 @@ in_el1:
     // configuration data
     isb // The ISB forces these changes to be
     // seen by the next instruction
-
-    mrs x0, ttbr0_el1
-    mrs x1, tcr_el1
-    mrs x2, sctlr_el1
 
     // Set stack to start below our code
     ldr     x1, =_init_kstack
