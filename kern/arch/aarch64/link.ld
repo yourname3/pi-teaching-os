@@ -18,11 +18,11 @@ SECTIONS
     /* .text : { KEEP(*(.text.boot)) *(.text .text.* .gnu.linkonce.t*) } */
     .text.boot : { KEEP(*(.text.boot)) }
     . = 0xFFFF000000000000;
-    .text : { *(.text .text.* .gnu.linkonce.t*) }
-    .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) }
+    .text : AT(ADDR(.text) - 0xFFFF000000000000) { *(.text .text.* .gnu.linkonce.t*) } 
+    .rodata : AT(ADDR(.rodata) - 0xFFFF000000000000) { *(.rodata .rodata.* .gnu.linkonce.r*) }
     PROVIDE(_data = .);
-    .data : { *(.data .data.* .gnu.linkonce.d*) }
-    .bss (NOLOAD) : {
+    .data : AT(ADDR(.data) - 0xFFFF000000000000) { *(.data .data.* .gnu.linkonce.d*) }
+    .bss (NOLOAD) : AT(ADDR(.bss) - 0xFFFF000000000000)  {
         . = ALIGN(16);
         __bss_start = .;
         *(.bss .bss.*)
