@@ -1,3 +1,14 @@
+.section ".data.boot"
+_ttrb1_init:
+    .quad 1 | (1 << 10) | (3 << 8)
+    .zero 8 * 8191
+
+_ttrb0_init:
+    .zero 8 * 8192
+
+_init_kstack:
+    .zero 8192
+
 // We place the .text.boot section first in our linker script to ensure that the
 // boot code is executed first.
 .section ".text.boot"
@@ -22,10 +33,25 @@ _start:
     // essentially a separate memory map for both the high address and low
     // address.
 
-    
+    ldr x0, =_ttrb0_init
+    ldr x1, =_ttrb1_init
+    ldr x2, =((0b101 << 32) | (3 << 30) | (22 << 16) | (3 << 14) | (22))
+
+    MSR TTBR0_EL1, X0 // Set TTBR0
+    MSR TTBR1_EL1, X1 // Set TTBR1
+    MSR TCR_EL1, X2 // Set TCR
+    ISB // The ISB forces these changes to be
+    // seen before the MMU is enabled.
+    MRS X0, SCTLR_EL1 // Read System Control Register
+    // configuration data
+    ORR X0, X0, #1 // Set [M] bit and enable the MMU.
+    MSR SCTLR_EL1, X0 // Write System Control Register
+    // configuration data
+    ISB // The ISB forces these changes to be
+    // seen by the next instruction
 
     // Set stack to start below our code
-    ldr     x1, =_start
+    ldr     x1, =_init_kstack
     mov     sp, x1
 
     // Clean the BSS section

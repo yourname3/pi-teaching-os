@@ -25,6 +25,8 @@ SECTIONS
 
     .text.boot : { KEEP(*(.text.boot)) } > phys AT> phys
 
+    .data.boot : { KEEP(*(.data.boot)) } > phys AT> phys
+
     .text : { *(.text .text.* .gnu.linkonce.t*) } > virt AT> phys
     .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) } > virt AT> phys
     PROVIDE(_data = .);
