@@ -55,4 +55,7 @@ qemu: kernel8.img
 qemu-debug: kernel8.img
 	$(QEMU) -s -S -machine raspi4b -kernel kernel8.img -serial null -serial stdio
 
+gdb: kernel8.img
+	$(GDB) kernel8.elf
+
 .PHONY: clean qemu qemu-debug
