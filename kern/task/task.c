@@ -2,16 +2,43 @@
 
 #include <kern/types.h>
 #include <kern/mem/mem.h>
+#include <kern/lib.h>
 
 #include <kern/arch/aarch64/pcb.h>
 
-#include <kern/console/console.h>
-
 struct task *curtask;
 
-/* TODO: Real task array system... */
-struct task *all_tasks[32];
-int alltasklen = 0;
+/* Define each of the linked lists for the various tasks. */
+static struct task *tasks_ready = NULL;
+static struct task *tasks_running = NULL;
+static struct task *tasks_sleeping = NULL;
+static struct task *tasks_zombie = NULL;
+
+static void
+task_unlink_state(struct task *task) {
+    if(task->state_prev) {
+        task->state_prev->state_next = task->state_next;
+    }
+
+    if(task->state_next) {
+        task->state_next->state_prev = task->state_prev;
+    }
+
+    task->state_next = NULL;
+    task->state_prev = NULL;
+}
+
+static void
+task_insert(struct task *task, struct task **list) {
+    task_unlink_state(task);
+    task->state_next = *list;
+    if(task->state_next) {
+        task->state_next->state_prev = task;
+    }
+
+    *list = task;
+    task->state_prev = NULL;
+}
 
 struct task*
 task_new() {
@@ -36,14 +63,13 @@ void
 task_bootstrap() {
     struct task *kmain = kzalloc(sizeof(*kmain));
     kmain->stack = NULL; /* We already have a stack. */
-    all_tasks[alltasklen++] = kmain;
-    curtask = kmain;
+    
+    task_insert(kmain, &tasks_running);
 }
 
 void
 task_start(struct task *t, task_entry_fn fn, void *userdata) {
-    all_tasks[alltasklen++] = t;
-
+    task_insert(t, &tasks_ready);
     md_init_new_task_pcb(&t->pcb, (uintptr_t)t->stack, fn, userdata);
 }
 
@@ -52,18 +78,37 @@ int nexttask = 0;
 struct task*
 scheduler() {
     /* Simple round-robin... */
-    struct task *result = all_tasks[nexttask];
-    nexttask = (nexttask + 1) % alltasklen;
+    return tasks_ready;
+}
 
-    return result;
+struct task**
+task_state_to_link(enum task_state state) {
+    switch(state) {
+        case TS_READY: return &tasks_ready;
+        case TS_RUNNING: return &tasks_running;
+        case TS_SLEEPING: return &tasks_sleeping;
+        case TS_ZOMBIE: return &tasks_zombie;
+        default:
+            panic("invalid task_state %d\n", state);
+    }
 }
 
 void
-mi_switch() {
-    /* Step 1: Put the current task in any relevant arrays */
-
-    /* Step 2: Call the scheduler */
+mi_switch(enum task_state into_state) {
+    /* Step 1: Call the scheduler. Do this before descheduling the current task
+     * for reasons. */
     struct task *next = scheduler();
+
+    /* Step 2: Remove the current task from RUNNING and put it into its new
+     * linked list. Note that we do this after scheduler to try to make it
+     * possible to implement a cool easy scheduler but TODO: that doesn't
+     * actually work */
+    assert(into_state != TS_RUNNING);
+    task_insert(curtask, task_state_to_link(into_state));
+
+    /* If there is no new task, default to the current. TODO implement idle
+     * task. */
+    if(!next) next = curtask;
 
     /* Step 3: Update curtask. We have to do this before the switch because
      * new tasks will not return here and will not otherwise have a chance to 
@@ -71,6 +116,7 @@ mi_switch() {
 
     struct task *prev = curtask;
     curtask = next;
+    task_unlink_state(curtask);
 
     /* Step 4: Actually perform the context switch */
     md_switch(&prev->pcb, &curtask->pcb);
@@ -81,12 +127,14 @@ mi_switch() {
 
 void
 task_yield() {
-    mi_switch();
+    /* Remain runnable. */
+    mi_switch(TS_READY);
 }
 
 void
 task_exit() {
-
+    /* This task has become a zombie. */
+    mi_switch(TS_ZOMBIE);
 }
 
 /**
