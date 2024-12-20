@@ -27,8 +27,8 @@ kernel8.img: kernel8.elf
 	@$(OBJCOPY) -O binary $< $@
 	@echo "OBJCOPY $@"
 
-kernel8.elf: $(OBJS)
-	@$(CC) $^ -o $@ -ffreestanding -nostdlib -T $(LINK)
+kernel8.elf: $(LINK) $(OBJS)
+	@$(CC) $(OBJS) -o $@ -ffreestanding -nostdlib -T $(LINK)
 	@echo "LD      $@"
 
 compile/%.c.o: %.c | $(DIRS)

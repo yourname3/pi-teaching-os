@@ -1,3 +1,8 @@
+MEMORY {
+    phys (rwxla) : ORIGIN = 0x80000, LENGTH = 1024M
+    virt (rwxa) : ORIGIN = 0xFFFF000000000000, LENGTH = 1024M
+}
+
 SECTIONS
 {
     /* Hmm..
@@ -14,21 +19,22 @@ SECTIONS
      * The other option is to just keep it simple stupid and identity map
      * everything that is so low. But then we don't get to use the ARM 
      * ttbr1 setup. */
-    . = 0x80000;     /* Kernel load address for AArch64 */
-    /* .text : { KEEP(*(.text.boot)) *(.text .text.* .gnu.linkonce.t*) } */
-    .text.boot : { KEEP(*(.text.boot)) }
-    . = 0xFFFF000000000000;
-    .text : AT(ADDR(.text) - 0xFFFF000000000000) { *(.text .text.* .gnu.linkonce.t*) } 
-    .rodata : AT(ADDR(.rodata) - 0xFFFF000000000000) { *(.rodata .rodata.* .gnu.linkonce.r*) }
+
+    .text.boot : { KEEP(*(.text.boot)) } > phys AT> phys
+
+    .text : { *(.text .text.* .gnu.linkonce.t*) } > virt AT> phys
+    .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) } > virt AT> phys
     PROVIDE(_data = .);
-    .data : AT(ADDR(.data) - 0xFFFF000000000000) { *(.data .data.* .gnu.linkonce.d*) }
-    .bss (NOLOAD) : AT(ADDR(.bss) - 0xFFFF000000000000)  {
+    .data :  {
+        *(.data .data.* .gnu.linkonce.d*)
+    } > virt AT> phys
+    .bss (NOLOAD) : {
         . = ALIGN(16);
         __bss_start = .;
         *(.bss .bss.*)
         *(COMMON)
         __bss_end = .;
-    }
+    } > virt AT> phys
     _end = .;
 
    /DISCARD/ : { *(.comment) *(.gnu*) *(.note*) *(.eh_frame*) }
