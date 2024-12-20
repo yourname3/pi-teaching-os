@@ -6,7 +6,7 @@
 struct trapframe {
     uint64_t vector_id;
 
-    uint64_t x[32];
+    uint64_t x[31];
 
     uint64_t esr;
     uint64_t elr;
