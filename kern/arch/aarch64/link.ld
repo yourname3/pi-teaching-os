@@ -1,11 +1,3 @@
-MEMORY {
-    phys (rwxla) : ORIGIN = 0x80000, LENGTH = 1024M
-    /* For convenience of setting up the early page table, we ensure that the memory
-     * is mapped in such a way that each kernel address refers to its physical
-     * address plus exactly 0xFFFF0000_00000000. */
-    virt (rwxa) : ORIGIN = 0xFFFF000000000000 + 0x80000, LENGTH = 1024M
-}
-
 SECTIONS
 {
     /* Hmm..
@@ -23,23 +15,42 @@ SECTIONS
      * everything that is so low. But then we don't get to use the ARM 
      * ttbr1 setup. */
 
-    .text.boot : ALIGN(16) { KEEP(*(.text.boot)) } > phys AT> phys
+    . = 0x80000;
 
-    .data.boot : ALIGN(16) { KEEP(*(.data.boot)) } > phys AT> phys
+    .text : ALIGN(4K) { KEEP(*(.text.boot)) }
 
-    .text : { *(.text .text.* .gnu.linkonce.t*) } > virt AT> phys
-    .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) } > virt AT> phys
+    .data.boot : ALIGN(4K) { KEEP(*(.data.boot)) }
+
+    . += 0xFFFF000000000000;
+
+    /**
+     * This somewhat awkward setup is necessary because we need the following
+     * relationship:
+     * VMA = LMA + exactly 0xFFFF000000000000
+     *
+     * Trying to get the linker to e.g. allocate using a MEMORY setup will
+     * instead result in the VMA being different by however much was already
+     * allocated to the physical memory.
+     *
+     * Instead, simply manually incrementing . (the current VMA) to point
+     * exactly where we need it, and then specifying each LMA by subtracting
+     * that again, gives the needed results.
+     */
+    .text.kern : AT(ADDR(.text.kern) - 0xFFFF000000000000) {
+        *(.text .text.* .gnu.linkonce.t*)
+    }
+    .rodata : AT(ADDR(.rodata) - 0xFFFF000000000000) { *(.rodata .rodata.* .gnu.linkonce.r*) }
     PROVIDE(_data = .);
-    .data :  {
+    .data : AT(ADDR(.data) - 0xFFFF000000000000) {
         *(.data .data.* .gnu.linkonce.d*)
-    } > virt AT> phys
-    .bss (NOLOAD) : {
+    }
+    .bss (NOLOAD) : AT(ADDR(.bss) - 0xFFFF000000000000) {
         . = ALIGN(16);
         __bss_start = .;
         *(.bss .bss.*)
         *(COMMON)
         __bss_end = .;
-    } > virt AT> phys
+    }
     _end = .;
 
    /DISCARD/ : { *(.comment) *(.gnu*) *(.note*) *(.eh_frame*) }
