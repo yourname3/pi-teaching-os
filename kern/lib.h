@@ -3,11 +3,13 @@
 
 /* lib.h -- defines common kernel library functions. */
 
-static inline _Noreturn void panic(const char *fmt, ...) { /* TODO */ }
+#include <kern/console/console.h>
+
+static inline _Noreturn void panic(const char *fmt, ...) { for(;;) { console_putstr(fmt); }}
 
 #define assert(condition) do { \
     if(!(condition)) { \
-        panic("assertion failed: %s ", #condition); \
+        panic("assertion failed: " #condition); \
     } \
 } while(0)
 

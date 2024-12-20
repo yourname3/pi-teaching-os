@@ -16,6 +16,8 @@ static struct task *tasks_zombie = NULL;
 
 static void
 task_unlink_state(struct task *task) {
+    assert(task != NULL);
+
     if(task->state_prev) {
         task->state_prev->state_next = task->state_next;
     }
@@ -30,6 +32,9 @@ task_unlink_state(struct task *task) {
 
 static void
 task_insert(struct task *task, struct task **list) {
+    assert(task != NULL);
+    assert(list != NULL);
+
     task_unlink_state(task);
     task->state_next = *list;
     if(task->state_next) {
@@ -54,6 +59,10 @@ task_new() {
         return NULL;
     }
 
+    t->state_next = NULL;
+    t->state_prev = NULL;
+    t->state = TS_READY;
+
     /* TODO: Set up stack protector. */
 
     return t;
@@ -63,8 +72,12 @@ void
 task_bootstrap() {
     struct task *kmain = kzalloc(sizeof(*kmain));
     kmain->stack = NULL; /* We already have a stack. */
+    kmain->state_next = NULL;
+    kmain->state_prev = NULL;
+    kmain->state = TS_RUNNING;
     
     task_insert(kmain, &tasks_running);
+    curtask = kmain;
 }
 
 void
