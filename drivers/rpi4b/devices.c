@@ -44,8 +44,12 @@ con_vt100 miniuart = {
 };
 console_io_attach miniuart_console = {0};
 
+extern void wdog_init();
+
 void
 load_devices() {
     create_vt100_console_attachment(&miniuart_console, &miniuart);
     console_attach(&miniuart_console);
+
+    wdog_init();
 }

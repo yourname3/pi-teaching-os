@@ -12,8 +12,10 @@ SRCS = \
 	kern/main/main.c \
 	kern/console/console.c \
 	kern/console/menu.c \
+	kern/devices/devices.c \
 	drivers/rpi4b/devices.c \
 	drivers/rpi4b/rpi4os_uart.c \
+	drivers/rpi4b/watchdog.c \
 	drivers/generic/con_vt100.c \
 	lib/libc/string.c 
 

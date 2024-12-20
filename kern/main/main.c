@@ -2,6 +2,7 @@
 #include <kern/console/menu.h>
 
 #include <kern/task/task.h>
+#include <kern/devices/power.h>
 
 void load_devices();
 
@@ -21,14 +22,21 @@ main() {
     
     task_bootstrap();
 
+
+    console_putstr("BOOTING_INTO_KERNEL");
     console_putc('A');
 
     struct task *second = task_new(); console_putc('B');
     task_start(second, second_task, NULL); console_putc('C');
 
+    int x = 100;
+
     for(;;) {
         console_putc('a');
         task_yield();
+        if(x --< 0) {
+            the_power->reboot();
+        }
     }
 
    // menu();
