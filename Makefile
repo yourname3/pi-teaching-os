@@ -36,7 +36,7 @@ compile/%.c.o: %.c | $(DIRS)
 	@echo "CC      $<"
 
 compile/%.S.o: %.S | $(DIRS)
-	@$(CC) -c $< -o $@ -ffreestanding
+	@$(CC) -c $< -o $@ -g -ffreestanding
 	@echo "AS      $<"
 
 $(DIRS):
@@ -50,10 +50,10 @@ clean:
 	rm -f kernel8.elf
 
 qemu: kernel8.img
-	$(QEMU) -machine raspi4b -kernel kernel8.img -serial null -serial stdio
+	$(QEMU) -machine raspi4b -kernel kernel8.elf -serial null -serial stdio
 
 qemu-debug: kernel8.img
-	$(QEMU) -s -S -machine raspi4b -kernel kernel8.img -serial null -serial stdio
+	$(QEMU) -s -S -machine raspi4b -kernel kernel8.elf -serial null -serial stdio
 
 gdb: kernel8.img
 	$(GDB) kernel8.elf
