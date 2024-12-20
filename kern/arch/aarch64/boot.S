@@ -11,7 +11,7 @@ _init_pagetable_level0:
 _init_pagetable_level1:
     .zero 8 * 512
 _init_pagetable_level0:
-    .zero 8 * 512
+    .zero 8 * 4096
 
 .section .data
 _init_kstack:
@@ -41,21 +41,64 @@ _start:
     // essentially a separate memory map for both the high address and low
     // address.
 
+    msr     spsel, 1
+    mrs     x0, CurrentEL
+    cmp     x0, 0b0100
+    beq     in_el1
+    blo     in_el0
+    cmp     x0, 0b1000
+    beq     in_el2
+in_el0:
+    b       .
+in_el3:
+    mrs     x0, scr_el3
+    orr     x0, x0, (1 << 10)
+    orr     x0, x0, (1 << 0)
+    and     x0, x0, ~(1 << 3)
+    and     x0, x0, ~(1 << 2)
+    and     x0, x0, ~(1 << 1)
+    msr     scr_el3, x0
+    mov     x0, 0b01001
+    msr     spsr_el3, x0
+
+    adr     x0, in_el2
+    msr     elr_el3, x0
+    eret
+in_el2:
+    mrs     x0, hcr_el2
+    orr     x0, x0, (1 << 31)
+    and     x0, x0, ~(1 << 5)
+    and     x0, x0, ~(1 << 4)
+    and     x0, x0, ~(1 << 3)
+    msr     hcr_el2, x0
+    mov     x0, 0b00101
+    msr     spsr_el2, x0
+
+    adr     x0, in_el1
+    msr     elr_el2, x0
+    eret
+in_el1:
+    mov     x0, 0b0101
+    msr     spsr_el1, x0
+
+
     ldr x0, =0xFF
     msr mair_el1, x0
+    isb
 
-    ldr x0, =_init_pagetable_level1
+ /*   ldr x0, =_init_pagetable_level1
     ldr x1, _init_pagetable_level0
-    orr x1, x1, x1
+    orr x1, x1, x0
 
     ldr x0, =_init_pagetable_level0
-    str x1, [x0]
+    str x1, [x0] */
    
-    ldr x2, =((0b101 << 32) | (2 << 30) | (3 << 28) | (1 << 26) | (1 << 24) | (16 << 16) | (0 << 14) | (3 << 12) | (1 << 10) | (1 << 8) | (16))
+    ldr x0, =_init_pagetable_level0
+    ldr x1, =((0b101 << 32) | (2 << 30) | (3 << 28) | (1 << 26) | (1 << 24) | (16 << 16) | (0 << 14) | (3 << 12) | (1 << 10) | (1 << 8) | (16))
 
     msr ttbr0_el1, x0 // Set TTBR0
     msr ttbr1_el1, x0 // Set TTBR1
-    msr tcr_el1, x2 // Set TCR
+    msr tcr_el1, x1 // Set TCR
     isb // The ISB forces these changes to be
     // seen before the MMU is enabled.
     mrs x0, sctlr_el1 // Read System Control Register
@@ -65,6 +108,10 @@ _start:
     // configuration data
     isb // The ISB forces these changes to be
     // seen by the next instruction
+
+    mrs x0, ttbr0_el1
+    mrs x1, tcr_el1
+    mrs x2, sctlr_el1
 
     // Set stack to start below our code
     ldr     x1, =_init_kstack
