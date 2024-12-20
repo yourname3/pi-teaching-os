@@ -4,7 +4,7 @@
 #include <kern/mem/mem.h>
 #include <kern/lib.h>
 
-#include <kern/arch/aarch64/pcb.h>
+#include <arch/pcb.h>
 
 struct task *curtask;
 

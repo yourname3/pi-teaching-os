@@ -1,6 +1,6 @@
 include .config
 
-CFLAGS = -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I.
+CFLAGS = -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I. -Icompile/symlinks
 
 # TODO: Machine-dependent makefile setup
 SRCS = \
@@ -27,15 +27,27 @@ kernel8.img: kernel8.elf
 	@$(OBJCOPY) -O binary $< $@
 	@echo "OBJCOPY $@"
 
+compile/symlinks/arch compile/symlinks/arch.lock: .config
+	@mkdir -p compile/symlinks
+	@touch compile/symlinks/arch.lock
+	@ln -s $(abspath kern/arch/$(ARCH)) compile/symlinks/arch
+	@echo "GEN     $@"
+
+compile/symlinks/device compile/symlinks/device.lock: .config
+	@mkdir -p compile/symlinks
+	@touch compile/symlinks/device.lock
+	@ln -s $(abspath drivers/$(DEVICE)) compile/symlinks/device
+	@echo "GEN     $@"
+
 kernel8.elf: $(LINK) $(OBJS)
 	@$(CC) $(OBJS) -o $@ -ffreestanding -nostdlib -T $(LINK)
 	@echo "LD      $@"
 
-compile/%.c.o: %.c | $(DIRS)
+compile/%.c.o: %.c | $(DIRS) compile/symlinks/arch compile/symlinks/device
 	@$(CC) -c $< -o $@ $(CFLAGS)
 	@echo "CC      $<"
 
-compile/%.S.o: %.S | $(DIRS)
+compile/%.S.o: %.S | $(DIRS) compile/symlinks/arch compile/symlinks/device
 	@$(CC) -c $< -o $@ -g -ffreestanding
 	@echo "AS      $<"
 

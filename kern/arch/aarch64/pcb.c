@@ -1,4 +1,4 @@
-#include <kern/arch/aarch64/pcb.h>
+#include "pcb.h"
 
 #include <kern/types.h>
 #include <kern/task/task.h>
