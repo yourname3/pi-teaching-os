@@ -31,7 +31,7 @@ main() {
    // task_start(second, second_task, NULL); console_putc('C');
 
     //for(;;) {
-    printk("Hello printk %d", 10);
+    printk("Hello printk %d %x %p %p", 10, 32, &main, NULL);
         //console_putc('a');
         //task_yield();
         //if(x --< 0) {
