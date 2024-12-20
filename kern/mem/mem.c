@@ -7,7 +7,7 @@ static char *heap_next = bump_heap;
 void *kzalloc(size_t size) {
     char *result = heap_next;
     /* Ensure we're always 16 byte aligned */
-    heap_next += (size + 15) % 16;
+    heap_next += size + ((16 - size) % 16);
     /* TODO Implement memset */
     for(size_t i = 0; i < size; ++i) {
         result[i] = 0;
