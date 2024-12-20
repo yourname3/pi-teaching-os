@@ -1,6 +1,9 @@
 MEMORY {
     phys (rwxla) : ORIGIN = 0x80000, LENGTH = 1024M
-    virt (rwxa) : ORIGIN = 0xFFFF000000000000, LENGTH = 1024M
+    /* For convenience of setting up the early page table, we ensure that the memory
+     * is mapped in such a way that each kernel address refers to its physical
+     * address plus exactly 0xFFFF0000_00000000. */
+    virt (rwxa) : ORIGIN = 0xFFFF000000000000 + 0x80000, LENGTH = 1024M
 }
 
 SECTIONS

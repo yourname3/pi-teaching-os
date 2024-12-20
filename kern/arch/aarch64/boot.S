@@ -14,6 +14,16 @@ _start:
     b       1b
 2:  // We're on the main core!
 
+    // Before we can jump to the kernel main code, we have to set up a basic
+    // memory map.
+    //
+    // The kernel is mapped to the "higher half" starting at 0xFFFF0000_00000000.
+    // On ARM, this has some convenient properties, in particular that we get
+    // essentially a separate memory map for both the high address and low
+    // address.
+
+    
+
     // Set stack to start below our code
     ldr     x1, =_start
     mov     sp, x1
