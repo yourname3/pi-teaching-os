@@ -1,6 +1,31 @@
 include .config
 
-CFLAGS = -MMD -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I. -Icompile/symlinks -Ilib/libc -mgeneral-regs-only
+##############################################################################
+#                               Setup CFLAGS.
+##############################################################################
+
+# Generate .d files for the build system
+CFLAGS=-MMD
+
+# Debugging flags
+CFLAGS+=-g
+
+# Freestanding related flags
+CFLAGS+=-ffreestanding -nostdlib -nostdinc -nostartfiles
+
+# Warning flags
+CFLAGS+=-Wall
+
+# Use C11 and GNU extensions
+CFLAGS+=-std=gnu11
+
+# Include path setup
+CFLAGS+=-I. -Icompile/symlinks -Ilib/libc
+
+# VERY IMPORTANT: Disable floating point registers for GCC. The code may trap
+# if we try to use floating point registers when they haven't been enabled.
+# The kernel should not use any floats.
+CFLAGS+=-mgeneral-regs-only
 
 # TODO: Machine-dependent makefile setup
 SRCS = \
