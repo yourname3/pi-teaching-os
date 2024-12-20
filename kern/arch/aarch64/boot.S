@@ -3,7 +3,9 @@
 .balign 0x1000
 _init_pagetable_level1:
     .quad 1 | (1 << 10) | (3 << 8)
-    .zero 8 * (512 - 1)
+    /* Place a second entry for the RPI peripheral MMIO. This should have nRnEnG properties. */
+    .quad 1 | (1 << 10) | (3 << 8) | (1 << 2) | 0xC0000000
+    .zero 8 * (512 - 2)
 
 .balign 0x1000
 _init_pagetable_level0:

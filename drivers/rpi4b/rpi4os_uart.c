@@ -9,7 +9,8 @@
 #include <kern/types.h>
 
 enum {
-    PERIPHERAL_BASE = 0xFE000000,
+    //PERIPHERAL_BASE 0xFE000000,
+    PERIPHERAL_BASE = 0x40000000 + (0xFE000000 - 0xC0000000), // memory mapped
     GPFSEL0         = PERIPHERAL_BASE + 0x200000,
     GPSET0          = PERIPHERAL_BASE + 0x20001C,
     GPCLR0          = PERIPHERAL_BASE + 0x200028,
