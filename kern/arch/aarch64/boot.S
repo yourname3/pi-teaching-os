@@ -14,8 +14,9 @@ _init_pagetable_level0:
     .zero 8 * (512 - 1)
 
 .section .data
-_init_kstack:
+_init_kstack_bottom:
     .zero 8192
+_init_kstack_top: /* Stack grows downwards. */
 
 // We place the .text.boot section first in our linker script to ensure that the
 // boot code is executed first.
@@ -111,7 +112,7 @@ in_el1:
     // seen by the next instruction
 
     // Set stack to start below our code
-    ldr     x1, =_init_kstack
+    ldr     x1, =_init_kstack_top
     mov     sp, x1
 
     // Clean the BSS section
