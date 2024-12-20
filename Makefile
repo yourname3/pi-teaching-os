@@ -25,11 +25,11 @@ LINK = kern/arch/aarch64/link.ld
 
 kernel8.img: kernel8.elf
 	@$(OBJCOPY) -O binary $< $@
-	@echo "OBJCOPY $<"
+	@echo "OBJCOPY $@"
 
 kernel8.elf: $(OBJS)
 	@$(CC) $^ -o $@ -ffreestanding -nostdlib -T $(LINK)
-	@echo "LD      $<"
+	@echo "LD      $@"
 
 compile/%.c.o: %.c | $(DIRS)
 	@$(CC) -c $< -o $@ $(CFLAGS)
