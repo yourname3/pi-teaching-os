@@ -5,6 +5,8 @@
 
 #include <kern/arch/aarch64/pcb.h>
 
+#include <kern/console/console.h>
+
 struct task *curtask;
 
 /* TODO: Real task array system... */
@@ -19,11 +21,12 @@ task_new() {
     }
 
     t->stack = kzalloc(STACK_SIZE);
+
     if(!t->stack) {
         kfree(t);
         return NULL;
     }
-    
+
     /* TODO: Set up stack protector. */
 
     return t;
@@ -31,7 +34,8 @@ task_new() {
 
 void
 task_bootstrap() {
-    struct task *kmain = task_new();
+    struct task *kmain = kzalloc(sizeof(*kmain));
+    kmain->stack = NULL; /* We already have a stack. */
     all_tasks[alltasklen++] = kmain;
     curtask = kmain;
 }

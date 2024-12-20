@@ -40,7 +40,8 @@ md_init_new_task_pcb(
      * We simply copy the offsets used to do this from the switch.S code. */
 
     char *stackdata = (char*)pcb->sp;
-    memcpy(stackdata + 0xF0, &mi_task_startup, sizeof(uintptr_t));
+    void *task_startup = &mi_task_startup;
+    memcpy(stackdata + 0xF0, &task_startup, sizeof(uintptr_t));
 
     memcpy(stackdata + 0x00, &entry_fn, 8);
     memcpy(stackdata + 0x08, &userdata, 8);

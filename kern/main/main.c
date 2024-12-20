@@ -21,12 +21,15 @@ main() {
     
     task_bootstrap();
 
-    struct task *second = task_new();
-    task_start(second, second_task, NULL);
+    console_putc('A');
+
+    struct task *second = task_new(); console_putc('B');
+    task_start(second, second_task, NULL); console_putc('C');
 
     for(;;) {
         console_putc('a');
         task_yield();
+        console_putc('c');
     }
 
    // menu();
