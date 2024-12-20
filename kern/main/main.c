@@ -1,4 +1,3 @@
-#include <kern/console/console.h>
 #include <kern/console/menu.h>
 
 #include <kern/task/task.h>
@@ -9,7 +8,7 @@ void load_devices();
 
 void second_task(void *userdata) {
     for(;;) {
-        console_putc('b');
+        printk("second task");
         task_yield();
     }
 }
@@ -23,27 +22,11 @@ main() {
     
     task_bootstrap();
 
+    printk("Welcome to the kernel.\n");
+    printk("kern> ");
 
-    console_putstr("BOOTING_INTO_KERNEL");
-    //console_putc('A');
-
-   // struct task *second = task_new(); console_putc('B');
-   // task_start(second, second_task, NULL); console_putc('C');
-
-    int *my_ptr = (int*)0xBADDF00D;
-    printk("my ptr = %d\n", *my_ptr);
-    //for(;;) {
-    //printk("Hello printk %d %x %p %p", 10, 32, &main, NULL);
-        //console_putc('a');
-        //task_yield();
-        //if(x --< 0) {
-        //    the_power->shutdown();
-       //}
-    //}
-
-   // menu();
-
-    //for(int i = 0; i < 20; ++i) { console_putstr("Hello, world!"); }
+    int *bad_food = (int*)0xBADF00D5;
+    *bad_food = 10;
 
     for(;;) {}
 }

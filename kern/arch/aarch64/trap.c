@@ -3,6 +3,8 @@
 #include <kern/lib.h>
 
 void aarch64_trapentry(struct trapframe *tf) {
+    printk("\n");
+
     /* Last two bits indicate interrupt type */
     switch(tf->vector_id & 3) {
         case 0: printk("Synchronous"); break;
@@ -44,6 +46,6 @@ void aarch64_trapentry(struct trapframe *tf) {
         printk(" ");
     }
 
-    printk("ESR_EL1 = %p ELR_EL1 = %p SPSR_EL1 = %p FAR_EL1 = %p",
+    printk("\nESR_EL1 = %p ELR_EL1 = %p\nSPSR_EL1 = %p FAR_EL1 = %p",
         tf->esr, tf->elr, tf->spsr, tf->far);
 }
