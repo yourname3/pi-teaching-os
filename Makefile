@@ -52,4 +52,7 @@ clean:
 qemu: kernel8.img
 	$(QEMU) -machine raspi4b -kernel kernel8.img -serial null -serial stdio
 
-.PHONY: clean qemu
+qemu-debug: kernel8.img
+	$(QEMU) -s -S -machine raspi4b -kernel kernel8.img -serial null -serial stdio
+
+.PHONY: clean qemu qemu-debug
