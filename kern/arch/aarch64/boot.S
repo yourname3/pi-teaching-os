@@ -6,6 +6,7 @@ _ttrb1_init:
 _ttrb0_init:
     .zero 8 * 8192
 
+.section .data
 _init_kstack:
     .zero 8192
 
@@ -37,17 +38,17 @@ _start:
     ldr x1, =_ttrb1_init
     ldr x2, =((0b101 << 32) | (3 << 30) | (22 << 16) | (3 << 14) | (22))
 
-    MSR TTBR0_EL1, X0 // Set TTBR0
-    MSR TTBR1_EL1, X1 // Set TTBR1
-    MSR TCR_EL1, X2 // Set TCR
-    ISB // The ISB forces these changes to be
+    msr ttbr0_el1, x0 // Set TTBR0
+    msr ttbr1_el1, x1 // Set TTBR1
+    msr tcr_el1, x2 // Set TCR
+    isb // The ISB forces these changes to be
     // seen before the MMU is enabled.
-    MRS X0, SCTLR_EL1 // Read System Control Register
+    mrs x0, sctlr_el1 // Read System Control Register
     // configuration data
-    ORR X0, X0, #1 // Set [M] bit and enable the MMU.
-    MSR SCTLR_EL1, X0 // Write System Control Register
+    orr x0, x0, #1 // Set [M] bit and enable the MMU.
+    msr sctlr_el1, x0 // Write System Control Register
     // configuration data
-    ISB // The ISB forces these changes to be
+    isb // The ISB forces these changes to be
     // seen by the next instruction
 
     // Set stack to start below our code
