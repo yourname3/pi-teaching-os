@@ -23,9 +23,9 @@ SECTIONS
      * everything that is so low. But then we don't get to use the ARM 
      * ttbr1 setup. */
 
-    .text.boot : { KEEP(*(.text.boot)) } > phys AT> phys
+    .text.boot : ALIGN(16) { KEEP(*(.text.boot)) } > phys AT> phys
 
-    .data.boot : { KEEP(*(.data.boot)) } > phys AT> phys
+    .data.boot : ALIGN(16) { KEEP(*(.data.boot)) } > phys AT> phys
 
     .text : { *(.text .text.* .gnu.linkonce.t*) } > virt AT> phys
     .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) } > virt AT> phys
