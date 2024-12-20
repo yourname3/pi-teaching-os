@@ -1,6 +1,6 @@
 include .config
 
-CFLAGS = -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I. -Icompile/symlinks
+CFLAGS = -MMD -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I. -Icompile/symlinks
 
 # TODO: Machine-dependent makefile setup
 SRCS = \
@@ -71,3 +71,5 @@ gdb: kernel8.img
 	$(GDB) kernel8.elf
 
 .PHONY: clean qemu qemu-debug
+
+-include $(OBJS:.o=.d)
