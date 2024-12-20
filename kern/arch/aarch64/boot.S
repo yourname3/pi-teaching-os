@@ -14,6 +14,7 @@ _init_pagetable_level0:
     .zero 8 * (512 - 1)
 
 .section .data
+.balign 0x1000
 _init_kstack_bottom:
     .zero 8192
 _init_kstack_top: /* Stack grows downwards. */

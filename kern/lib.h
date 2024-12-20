@@ -16,4 +16,9 @@ static inline _Noreturn void panic(const char *fmt, ...) { for(;;) { console_put
 /* Include some important libc functions. */
 #include <string.h>
 
+/**
+ * Kernel print function.
+ */
+void printk(const char *fmt, ...);
+
 #endif

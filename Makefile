@@ -1,6 +1,6 @@
 include .config
 
-CFLAGS = -MMD -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I. -Icompile/symlinks -Ilib/libc
+CFLAGS = -MMD -g -ffreestanding -nostdlib -nostdinc -nostartfiles -Wall -std=gnu11 -I. -Icompile/symlinks -Ilib/libc -mgeneral-regs-only
 
 # TODO: Machine-dependent makefile setup
 SRCS = \
@@ -10,6 +10,7 @@ SRCS = \
 	kern/mem/mem.c \
 	kern/task/task.c \
 	kern/main/main.c \
+	kern/lib/printk.c \
 	kern/console/console.c \
 	kern/console/menu.c \
 	kern/devices/devices.c \
@@ -17,7 +18,8 @@ SRCS = \
 	drivers/rpi4b/rpi4os_uart.c \
 	drivers/rpi4b/watchdog.c \
 	drivers/generic/con_vt100.c \
-	lib/libc/string.c 
+	lib/libc/string.c \
+	lib/libc/printf.c 
 
 OBJS = $(SRCS:%=compile/%.ko)
 

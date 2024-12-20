@@ -47,3 +47,22 @@ memset(void *s, int c, size_t n) {
 
     return s;
 }
+
+size_t
+strlen(const char *string) {
+    size_t len = 0;
+
+    while(string[len]) ++len;
+
+    return len;
+}
+
+char*
+strchr(const char *s, int c) {
+    while(*s) {
+        if(*s == c) {
+            return (char*)s;
+        }
+    }
+    return NULL;
+}

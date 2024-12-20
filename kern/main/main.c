@@ -3,6 +3,7 @@
 
 #include <kern/task/task.h>
 #include <kern/devices/power.h>
+#include <kern/lib.h>
 
 void load_devices();
 
@@ -24,20 +25,19 @@ main() {
 
 
     console_putstr("BOOTING_INTO_KERNEL");
-    console_putc('A');
+    //console_putc('A');
 
-    struct task *second = task_new(); console_putc('B');
-    task_start(second, second_task, NULL); console_putc('C');
+   // struct task *second = task_new(); console_putc('B');
+   // task_start(second, second_task, NULL); console_putc('C');
 
-    int x = 100;
-
-    for(;;) {
-        console_putc('a');
-        task_yield();
-        if(x --< 0) {
-            the_power->shutdown();
-        }
-    }
+    //for(;;) {
+    printk("Hello printk %d", 10);
+        //console_putc('a');
+        //task_yield();
+        //if(x --< 0) {
+        //    the_power->shutdown();
+       //}
+    //}
 
    // menu();
 
