@@ -2,6 +2,10 @@
 
 #include <kern/lib.h>
 
+/* For other decoders of the ESR register, see:
+ * https://github.com/google/aarch64-esr-decoder/blob/main/src/esr/mod.rs
+ */
+
 void aarch64_trapentry(struct trapframe *tf) {
     printk("\n");
 
