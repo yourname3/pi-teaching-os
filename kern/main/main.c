@@ -35,7 +35,7 @@ main() {
         console_putc('a');
         task_yield();
         if(x --< 0) {
-            the_power->reboot();
+            the_power->shutdown();
         }
     }
 

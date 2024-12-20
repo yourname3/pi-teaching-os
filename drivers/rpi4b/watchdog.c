@@ -33,13 +33,25 @@ static volatile unsigned int* pm_rsts;
 
 static void
 wdog_shutdown() {
-    panic("todo wdog_shutdown");
+    /*
+     * TODO: Consider shutting down other devices, see 
+     * https://github.com/bztsrc/raspi3-tutorial/blob/master/08_power/power.c 
+     */
+    unsigned int r;
+
+    r = *pm_rsts;
+    r &= ~0xFFFFFFAAA;
+    r |= 0x555; /* Special partion 63 used to indicate halt */
+    *pm_rsts = PM_PASSWORD | r;
+    *pm_wdog = PM_PASSWORD | 10;
+    *pm_rstc = PM_PASSWORD | PM_RSTC_WRCFG_FULL_RESET;
 }
 
 static void
 wdog_reboot() {
     unsigned int r = *pm_rsts;
     r &= ~0xFFFFFFAAA;
+    /* Reboot from partition 0 */
     *pm_rsts = PM_PASSWORD | r;
     *pm_wdog = PM_PASSWORD | 10;
     *pm_rstc = PM_PASSWORD | PM_RSTC_WRCFG_FULL_RESET;
