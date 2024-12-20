@@ -119,10 +119,25 @@ in_el1:
     // Clean the BSS section
     ldr     x1, = __bss_start     // Start address
     ldr     w2, = __bss_size      // Size of the section
-3:  cbz     w2, 4f                // Quit loop if zero
+3:  cbz     w2, ready                // Quit loop if zero
     str     xzr, [x1], #8
     sub     w2, w2, #1
     cbnz    w2, 3b                // Loop if non-zero
+
+ready:
+    b high_code
+
+.section ".text"
+
+    // Start executing in the higher half now
+high_code:
+
+    // Set up interrupts
+    ldr x0, =interrupt_vectors
+    msr vbar_el1, x0
+
+    // Enable irqs
+    msr daifclr, #2
 
     // Jump to our main() routine in C (make sure it doesn't return)
 4:  bl      main

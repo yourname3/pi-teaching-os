@@ -30,8 +30,10 @@ main() {
    // struct task *second = task_new(); console_putc('B');
    // task_start(second, second_task, NULL); console_putc('C');
 
+    int *my_ptr = (int*)0xBADDF00D;
+    printk("my ptr = %d\n", *my_ptr);
     //for(;;) {
-    printk("Hello printk %d %x %p %p", 10, 32, &main, NULL);
+    //printk("Hello printk %d %x %p %p", 10, 32, &main, NULL);
         //console_putc('a');
         //task_yield();
         //if(x --< 0) {

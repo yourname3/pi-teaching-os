@@ -32,6 +32,8 @@ SRCS = \
 	kern/arch/aarch64/boot.S \
 	kern/arch/aarch64/switch.S \
 	kern/arch/aarch64/pcb.c \
+	kern/arch/aarch64/interrupt.S \
+	kern/arch/aarch64/trap.c \
 	kern/mem/mem.c \
 	kern/task/task.c \
 	kern/main/main.c \
