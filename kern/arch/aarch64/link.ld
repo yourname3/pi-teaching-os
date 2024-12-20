@@ -1,22 +1,19 @@
 SECTIONS
 {
-    /* Hmm..
-     * So we have kind of two things here:
-     * 1. We want to have the kernel code referencing things like, the data
-     *    at address 0xFFFF0000_00000000 and such.
-     * 2. We need to have the bootloader actually load us into physical (?)
-     *    memory.
-     *
-     * It seems like what we really want to do is embed the entire kernel elf
-     * into a second, bootloader sort of elf that sets up the page table as
-     * necessary and then jumps into the kernel...
-     *
-     * The other option is to just keep it simple stupid and identity map
-     * everything that is so low. But then we don't get to use the ARM 
-     * ttbr1 setup. */
-
+    /* Start putting stuff at the address expected by the bootloader.
+     * For Raspberry Pi, this is 0x80000. */
     . = 0x80000;
 
+    /* We're putting everything in physical memory starting at the boot address.
+     * However, we then have a split between physical memory and virtual memory:
+     * Everything but the bootloader will be running with some memory mapping
+     * occuring.
+     *
+     * But the boot code does not have the MMU set up, so it needs to run at
+     * the low addresses.
+     *
+     * Put the boot code in ".text" and all other code in ".text.kern" -- this
+     * makes QEMU happy when booting the kernel. */
     .text : ALIGN(4K) { KEEP(*(.text.boot)) }
 
     .data.boot : ALIGN(4K) { KEEP(*(.data.boot)) }
