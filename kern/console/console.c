@@ -35,7 +35,7 @@ console_putc(char c) {
 }
 
 void
-console_putstr(char *str) {
+console_putstr(const char *str) {
     while(*str) {
         console_putc(*str);
         str++;

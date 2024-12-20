@@ -61,7 +61,7 @@ typedef struct console_io_attach {
 
 void console_attach(console_io_attach *attachment);
 void console_putc(char c);
-void console_putstr(char *str);
+void console_putstr(const char *str);
 bool console_getc(char*);
 
 bool console_poll(con_poll_result *out);
