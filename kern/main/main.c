@@ -24,9 +24,6 @@ main() {
 
     printk("Welcome to the kernel.\n");
     printk("kern> ");
-
-    int *bad_food = (int*)0xBADF00D5;
-    *bad_food = 10;
-
+    
     for(;;) {}
 }

@@ -136,8 +136,8 @@ high_code:
     ldr x0, =interrupt_vectors
     msr vbar_el1, x0
 
-    // Enable irqs
-    msr daifclr, #2
+    // Enable all exceptions
+    msr daifclr, #0xF
 
     // Jump to our main() routine in C (make sure it doesn't return)
 4:  bl      main

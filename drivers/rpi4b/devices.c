@@ -35,6 +35,10 @@
 #include <kern/console/console.h>
 #include <drivers/generic/con_vt100.h>
 
+#include <drivers/aarch64/el1_physical_timer.h>
+
+#include <drivers/rpi4b/bcm2711_irq.h>
+
 extern void uart_writeByteBlockingActual(char ch, void *unused);
 extern bool uart_readByte(char *out, void *unused);
 
@@ -51,5 +55,10 @@ load_devices() {
     create_vt100_console_attachment(&miniuart_console, &miniuart);
     console_attach(&miniuart_console);
 
+    bcm2711_irq_init();
+    bcm2711_irq_enable_timer();
+
     wdog_init();
+
+    el1_timer_setup();
 }
