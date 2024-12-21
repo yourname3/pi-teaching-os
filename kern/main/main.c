@@ -24,6 +24,6 @@ main() {
 
     printk("Welcome to the kernel.\n");
     printk("kern> ");
-    
+
     for(;;) {}
 }

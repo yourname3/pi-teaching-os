@@ -14,7 +14,7 @@ aarch64_irq(struct trapframe *tf) {
 
 void
 aarch64_trapentry(struct trapframe *tf) {
-    printk("\n");
+    printk("aarch64_trapentry\n");
 
     /* Last two bits indicate interrupt type. This is just a consequence of
      * how we set up the t able in interrupt.S -- we chose the numbers 0-15

@@ -36,6 +36,7 @@
 #include <drivers/generic/con_vt100.h>
 
 #include <drivers/aarch64/el1_physical_timer.h>
+#include <drivers/aarch64/gic_400.h>
 
 #include <drivers/rpi4b/bcm2711_irq.h>
 
@@ -55,8 +56,13 @@ load_devices() {
     create_vt100_console_attachment(&miniuart_console, &miniuart);
     console_attach(&miniuart_console);
 
-    bcm2711_irq_init();
-    bcm2711_irq_enable_timer();
+    gic_400_init(0x40000000 + (0xFF840000 - 0xC0000000));
+    gic_400_assign_irq_cpu(29, 0);
+    gic_400_enable(29);
+    
+
+   // bcm2711_irq_init();
+    // bcm2711_irq_enable_timer();
 
     wdog_init();
 
