@@ -6,6 +6,8 @@
 
 #define TIMER_CNTRL0 (*(volatile uint32_t*)(ARM_LOCAL + 0x40))
 
+#define IRQ_ENABLE_0 ((volatile uint32_t*)(BASE_ADDRESS + 0x0000B200 + 20))
+
 /**
  * TODO:
  * It appears that the "legacy" interrupt controller is not going to just work,
@@ -22,4 +24,5 @@ bcm2711_irq_init() {
 void
 bcm2711_irq_enable_timer() {
     TIMER_CNTRL0 |= 1;
+    *IRQ_ENABLE_0 = (2 | 8);
 }
