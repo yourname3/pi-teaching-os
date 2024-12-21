@@ -81,13 +81,15 @@ load_devices() {
     gic_400_assign_irq_cpu(99, 0);
     gic_400_enable(99);
 
-    rpi_timer_init();
-    
-
     bcm2711_irq_init();
     bcm2711_irq_enable_timer();
 
+
+    rpi_timer_init();
+    
+
+    
     wdog_init();
 
-    el1_timer_setup();
+    //el1_timer_setup();
 }
