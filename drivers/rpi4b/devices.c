@@ -62,9 +62,10 @@ rpi_timer_init() {
     // compare[2] = 20
     volatile uint32_t *compare_3 = (volatile uint32_t*)(TIMER_BASE + 24);
 
+    *control_status = 2 | 8;
     *compare_1 = (*counter_lo + 1000000);
     *compare_3 = (*counter_lo + 1000000);
-    *control_status = 2 | 8;
+    
 }
 
 void
@@ -94,5 +95,5 @@ load_devices() {
     
     wdog_init();
 
-    //el1_timer_setup();
+    el1_timer_setup();
 }

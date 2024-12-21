@@ -91,6 +91,8 @@
 #define GICD_CTRLR	0x0
 #define GICD_IGROUPR	0x80
 
+.section ".text.boot.entry"
+
 .globl _start
 _start:
 	/*
