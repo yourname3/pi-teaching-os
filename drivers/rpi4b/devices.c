@@ -86,6 +86,8 @@ load_devices() {
     bcm2711_irq_enable_timer();
 
 
+    __asm("dsb sy");
+
     rpi_timer_init();
     
 
