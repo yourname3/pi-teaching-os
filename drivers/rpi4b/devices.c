@@ -64,6 +64,7 @@ rpi_timer_init() {
 
     *compare_1 = (*counter_lo + 1000000);
     *compare_3 = (*counter_lo + 1000000);
+    *control_status = 2 | 8;
 }
 
 void

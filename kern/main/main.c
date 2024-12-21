@@ -30,6 +30,7 @@ main() {
 
     #define TIMER_BASE (((0x40000000 + (0xFE000000 - 0xC0000000)) + 0x00003000))
     volatile uint32_t *control_status = (volatile uint32_t*)TIMER_BASE;
+    
     volatile uint32_t *counter_lo = (volatile uint32_t*)(TIMER_BASE + 4);
     volatile uint32_t *counter_hi = (volatile uint32_t*)(TIMER_BASE + 8);
     // compare[0] = 12
@@ -38,7 +39,7 @@ main() {
     volatile uint32_t *compare_3 = (volatile uint32_t*)(TIMER_BASE + 24);
 
     for(;;) {
-        printk("counter = %d compare = %d\n", *counter_lo, *compare_1);
+        //printk("counter = %d compare = %d\n", *counter_lo, *compare_1);
         if(*counter_lo > *compare_1) {
             printk("timer expired....\n");
             break;

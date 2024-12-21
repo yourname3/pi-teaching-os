@@ -1,5 +1,7 @@
 #include "gic_400.h"
 
+#include <kern/lib.h>
+
 static volatile uint32_t *gicd_dist_base = 0;
 static volatile uint32_t *gicc_cpu_base = 0;
 
@@ -34,6 +36,8 @@ gic_400_enable(uint32_t irq) {
     volatile uint32_t *enable_reg = &gicd_enable_irq_base[n];
     /* Register is set-enable so we don't OR it. */
     *enable_reg = (1 << offset);
+
+    printk("gic_400_enable %d - %x\n", n, *enable_reg);
 }
 
 void
@@ -41,6 +45,10 @@ gic_400_assign_irq_cpu(uint32_t irq, uint32_t cpu) {
     uint32_t n = irq / 4;
     volatile uint32_t *target_reg = &gic_irq_target_base[n];
 
+    uint32_t offset = (irq % 4) * 8 + cpu;
+
     /* TODO support cpu param */
-    *target_reg |= (1 << 8);
+    *target_reg |= (1 << offset);
+
+    printk("gic_400_assign %d - %x\n", n, *target_reg);
 }
