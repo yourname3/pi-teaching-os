@@ -29,6 +29,8 @@ CFLAGS+=-mgeneral-regs-only
 
 # TODO: Machine-dependent makefile setup
 SRCS = \
+	drivers/rpi4b/armstub8.S \
+	\
 	kern/arch/aarch64/boot.S \
 	kern/arch/aarch64/switch.S \
 	kern/arch/aarch64/pcb.c \
