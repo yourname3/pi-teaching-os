@@ -73,6 +73,14 @@ in_el2:
     and     x0, x0, ~(1 << 5)
     and     x0, x0, ~(1 << 4)
     and     x0, x0, ~(1 << 3)
+
+    /* Disable TGE and E2H Bits.
+     * TODO: Figure out exactly which bits we want set.
+     * https://krinkinmu.github.io/2021/01/10/aarch64-interrupt-handling.html
+     */
+    and x0, x0, #~(1 << 34)
+    and x0, x0, #~(1 << 27)
+
     msr     hcr_el2, x0
     mov     x0, 0b00101
     msr     spsr_el2, x0
