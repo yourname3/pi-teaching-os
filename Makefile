@@ -50,7 +50,6 @@ SRCS = \
 	drivers/aarch64/el1_physical_timer.S \
 	drivers/aarch64/el1_physical_timer.c \
 	drivers/aarch64/gic_400.c \
-	drivers/rpi4b/bcm2711_irq.c \
 	lib/libc/string.c \
 	lib/libc/printf.c 
 

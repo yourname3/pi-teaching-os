@@ -14,5 +14,5 @@ setup_timer_tval:
 setup_timer_irq:
     /* turn on ENABLE, turn off IMASK */
     mov x0, #((1 << 0) | (0 << 1))
-    mrs x0, cntp_ctl_el0
+    msr cntp_ctl_el0, x0
     ret
