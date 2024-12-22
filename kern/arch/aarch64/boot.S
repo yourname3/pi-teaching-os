@@ -26,6 +26,9 @@ _init_kstack_top: /* Stack grows downwards. */
 .global _start
 
 _start:
+    /* Setup the GIC (TODO replace with C code) */
+    bl setup_gic
+
     // Check processor ID is zero (executing on main core), else hang
     mrs     x1, mpidr_el1
     and     x1, x1, #3
@@ -134,6 +137,40 @@ in_el1:
 
 ready:
     b high_code
+
+#define GICC_CTRLR	0x0
+#define GICC_PMR	0x4
+#define IT_NR		0x8	// Number of interrupt enable registers (256 total irqs)
+#define GICD_CTRLR	0x0
+#define GICD_IGROUPR	0x80
+#define GIC_DISTB		0xff841000
+#define GIC_CPUB		0xff842000
+
+/* TODO:
+ * This code is taken from the MIT licensed RPI "armstub8.S" file. It should be possible to translate
+ * this to C and put it into the GIC driver. */
+setup_gic:				// Called from secure mode - set all interrupts to group 1 and enable.
+	mrs	x0, MPIDR_EL1
+	ldr	x2, =GIC_DISTB
+	tst	x0, #0x3
+	b.eq	2f			// primary core
+
+	mov	w0, #3			// Enable group 0 and 1 IRQs from distributor
+	str	w0, [x2, #GICD_CTRLR]
+2:
+	add	x1, x2, #(GIC_CPUB - GIC_DISTB)
+	mov	w0, #0x1e7
+	str	w0, [x1, #GICC_CTRLR]	// Enable group 1 IRQs from CPU interface
+	mov	w0, #0xff
+	str	w0, [x1, #GICC_PMR]	// priority mask
+	add	x2, x2, #GICD_IGROUPR
+	mov	x0, #(IT_NR * 4)
+	mov	w1, #~0			// group 1 all the things
+3:
+	subs	x0, x0, #4
+	str	w1, [x2, x0]
+	b.ne	3b
+	ret
 
 .section ".text"
 
