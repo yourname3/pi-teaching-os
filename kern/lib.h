@@ -21,4 +21,11 @@ static inline _Noreturn void panic(const char *fmt, ...) { for(;;) { console_put
  */
 void printk(const char *fmt, ...);
 
+void *kzalloc(size_t size);
+void *kzrealloc(void *ptr, size_t new_size);
+void kfree(void *mem);
+
+void *kzalloc_or_die(size_t size, const char *fmt, ...);
+void *kzrealloc_or_die(void *ptr, size_t new_size, const char *fmt, ...);
+
 #endif

@@ -41,6 +41,7 @@ SRCS = \
 	kern/console/console.c \
 	kern/console/menu.c \
 	kern/devices/devices.c \
+	kern/irq.c \
 	drivers/rpi4b/devices.c \
 	drivers/rpi4b/rpi4os_uart.c \
 	drivers/rpi4b/watchdog.c \

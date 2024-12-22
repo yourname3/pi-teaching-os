@@ -14,6 +14,33 @@ void *kzalloc(size_t size) {
     memset(result, 0, size);
     return result;
 }
+
+void *kzrealloc(void *ptr, size_t new_size) {
+    void *new_alloc = kzalloc(new_size);
+    if(new_alloc) {
+        kfree(ptr);
+        return new_alloc;
+    }
+    return NULL;
+}
+
+void *kzalloc_or_die(size_t size, const char *fmt, ...) {
+    void *result = kzalloc(size);
+    if(!result) {
+        /* TODO vprintk / vpanic */
+        panic(fmt);
+    }
+    return result;
+}
+
+void *kzrealloc_or_die(void *ptr, size_t new_size, const char *fmt, ...) {
+    void *result = kzrealloc(ptr, new_size);
+    if(!result) {
+        panic(fmt);
+    }
+    return result;
+}
+
 void kfree(void *mem) {
     /* TODO */
 }
