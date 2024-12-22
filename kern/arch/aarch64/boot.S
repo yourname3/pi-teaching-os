@@ -23,9 +23,9 @@ _init_kstack_top: /* Stack grows downwards. */
 // boot code is executed first.
 .section ".text.boot"
 
-.global _start_kernel_aarch64
+.global _start
 
-_start_kernel_aarch64:
+_start:
     // Check processor ID is zero (executing on main core), else hang
     mrs     x1, mpidr_el1
     and     x1, x1, #3

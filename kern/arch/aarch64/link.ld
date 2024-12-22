@@ -14,7 +14,7 @@ SECTIONS
      *
      * Put the boot code in ".text" and all other code in ".text.kern" -- this
      * makes QEMU happy when booting the kernel. */
-    .text : ALIGN(4K) { KEEP(*(.text.boot.entry)) KEEP(*(.text.boot)) }
+    .text : ALIGN(4K) { KEEP(*(.text.boot)) }
 
     .data.boot : ALIGN(4K) { KEEP(*(.data.boot)) }
 
