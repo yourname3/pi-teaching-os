@@ -71,9 +71,9 @@ void gic_init (void) {
     PUT32(GICD_CTLR, 7);
 
     // set Core0 interrupts mask theshold prio to F0, to react on higher prio a0
-    PUT32(GICC_PRIO, 0xF0);
+    PUT32(GICC_PRIO, 0xFF);
     // enable CPU interface
-    PUT32(GICC_CTLR, 3);
+    PUT32(GICC_CTLR, 0x1e7);
 }
 
 /*
