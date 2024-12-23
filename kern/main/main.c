@@ -3,6 +3,7 @@
 #include <kern/task/task.h>
 #include <kern/devices/power.h>
 #include <kern/lib.h>
+#include <kern/irq.h>
 
 void load_devices();
 
@@ -18,6 +19,10 @@ void second_task(void *userdata) {
  */
 void
 main() {
+    /* Must initialize IRQ subsystem before we load devices. This is because
+     * the devices will almost certainly register some IRQs. */
+    irq_init();
+
     load_devices();
     
     task_bootstrap();

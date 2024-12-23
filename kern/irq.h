@@ -33,8 +33,9 @@ typedef int (*irq_callback_fn)(void *userdata);
 _Static_assert(IRQ_NULL == 0, "IRQ_NULL must exist and have value 0.");
 _Static_assert(IRQ_TOMBSTONE == 1, "IRQ_TOMBSTONE must exist and have value 1.");
 
+void irq_init();
 void irq_register(size_t irq_id, irq_callback_fn fn, void *userdata);
-bool irq_fire(size_t irq_id, int **result);
+bool irq_fire(size_t irq_id, int *result);
 void irq_unregister(size_t irq_id);
 
 #endif

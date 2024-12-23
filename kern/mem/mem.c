@@ -16,8 +16,13 @@ void *kzalloc(size_t size) {
 }
 
 void *kzrealloc(void *ptr, size_t new_size) {
+    panic("kzrealloc doesn't function correctly yet.");
+
     void *new_alloc = kzalloc(new_size);
     if(new_alloc) {
+        // TODO: We need to copy over the old size, but this requires we know
+        // the old size. We need to implement a real allocator.
+        // memcpy(new_alloc, ptr, )
         kfree(ptr);
         return new_alloc;
     }
