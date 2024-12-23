@@ -17,7 +17,7 @@ el1_timer_irq(void *userdata) {
     printk("el1 timer fired\n");
 
     __asm__(
-        "mov x0, #((1 << 0) | (0 << 1))\n"
+        "mov x0, #0\n"
         "msr cntp_ctl_el0, x0\n"
     );
 
