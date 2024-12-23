@@ -48,7 +48,6 @@ SRCS = \
 	drivers/rpi4b/rpi4os_uart.c \
 	drivers/rpi4b/watchdog.c \
 	drivers/generic/con_vt100.c \
-	drivers/aarch64/el1_physical_timer.S \
 	drivers/aarch64/el1_physical_timer.c \
 	drivers/aarch64/gic_400.c \
 	lib/libc/string.c \
