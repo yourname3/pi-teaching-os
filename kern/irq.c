@@ -81,6 +81,10 @@ irq_rehash() {
 
 void
 irq_register(size_t irq_id, irq_callback_fn fn, void *userdata) {
+    assert(fn != NULL);
+    assert(irq_id != IRQ_NULL);
+    assert(irq_id != IRQ_TOMBSTONE);
+
     /** Load factor of 2. */
     if((irq_map.used + 1) * 2 >= irq_map.allocated) {
         irq_rehash();
@@ -108,18 +112,26 @@ irq_register(size_t irq_id, irq_callback_fn fn, void *userdata) {
 
 bool
 irq_fire(size_t irq_id, int *result) {
+    /* Allow for interrupt controllers to pass IRQ_NULL as a value for convenience.
+     * Do not allow IRQ_TOMBSTONE. */
+    if(irq_id == IRQ_NULL) return false; /* No such interrupt */
+
+    assert(irq_id != IRQ_TOMBSTONE);
+
     /* Look for the id in the map. */
     size_t idx = irq_id % irq_map.allocated;
 
     for(size_t i = 0; i < irq_map.allocated; ++i) {
-        if(irq_map.entries[i].id == irq_id) {
-            int err = irq_map.entries[i].fn(irq_map.entries[i].userdata);
+        /* WARNING: DO NOT INDEX ANYTHING WITH i HERE.
+         * TODO: Maybe rewrite this logic so this mistake is harder to make? */
+        if(irq_map.entries[idx].id == irq_id) {
+            int err = irq_map.entries[idx].fn(irq_map.entries[idx].userdata);
             if(result) *result = err;
             return true;
         }
 
         /* A NULL slot indicates there's no reason to keep searching. */
-        if(irq_map.entries[i].id == IRQ_NULL) {
+        if(irq_map.entries[idx].id == IRQ_NULL) {
             return false;
         }
 

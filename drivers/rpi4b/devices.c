@@ -38,6 +38,8 @@
 #include <drivers/aarch64/el1_physical_timer.h>
 #include <drivers/aarch64/gic_400.h>
 
+#include <kern/irq.h>
+
 extern void uart_writeByteBlockingActual(char ch, void *unused);
 extern bool uart_readByte(char *out, void *unused);
 
@@ -54,9 +56,10 @@ load_devices() {
     create_vt100_console_attachment(&miniuart_console, &miniuart);
     console_attach(&miniuart_console);
 
-    gic_400_init(0x40000000 + (0xFF840000 - 0xC0000000));
-    gic_400_assign_irq_cpu(30, 0);
-    gic_400_enable(30);
+    gic_400_init(0x40000000 + (0xFF840000 - 0xC0000000), 32 + 96);
+    //gic_400_assign_irq_cpu(30, 0);
+    //gic_400_enable(30);
+    gic_400_install_ppi(30, IRQ_EL1_PHYSICAL_TIMER);
 
     wdog_init();
 
