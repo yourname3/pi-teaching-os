@@ -34,6 +34,7 @@ SRCS = \
 	kern/arch/aarch64/pcb.c \
 	kern/arch/aarch64/interrupt.S \
 	kern/arch/aarch64/trap.c \
+	kern/arch/aarch64/spl.c \
 	kern/mem/mem.c \
 	kern/task/task.c \
 	kern/main/main.c \
@@ -41,6 +42,7 @@ SRCS = \
 	kern/console/console.c \
 	kern/console/menu.c \
 	kern/devices/devices.c \
+	kern/devices/preempt.c \
 	kern/irq.c \
 	drivers/rpi4b/devices.c \
 	drivers/rpi4b/rpi4os_uart.c \

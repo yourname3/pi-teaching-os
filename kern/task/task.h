@@ -34,8 +34,12 @@ struct task {
 
     enum task_state state;
 
+    int spl;
+
     char *stack;
 };
+
+extern struct task *curtask;
 
 typedef void (*task_entry_fn)(void*);
 

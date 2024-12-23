@@ -2,6 +2,7 @@
 
 #include <kern/lib.h>
 #include <kern/irq.h>
+#include <kern/devices/preempt.h>
 
 static inline void
 set_cntp_tval_el0(uint64_t val) {
@@ -24,10 +25,10 @@ int
 el1_timer_irq(void *userdata) {
     (void)userdata;
 
-    printk("el1 timer fired\n");
-
     set_cntp_ctl_el0(1);
-    set_cntp_tval_el0(get_cntfrq_el0());
+    set_cntp_tval_el0(get_cntfrq_el0() / preempt_goal_hz());
+
+    preempt_fire();
 
     return 0;
 }
@@ -38,5 +39,5 @@ el1_timer_setup() {
     irq_register(IRQ_EL1_PHYSICAL_TIMER, el1_timer_irq, NULL);
 
     set_cntp_ctl_el0(1 << 0);
-    set_cntp_tval_el0(get_cntfrq_el0());
+    set_cntp_tval_el0(get_cntfrq_el0() / preempt_goal_hz());
 }

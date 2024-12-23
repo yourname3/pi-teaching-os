@@ -5,6 +5,7 @@
 #include <kern/lib.h>
 
 #include <arch/pcb.h>
+#include <arch/spl.h>
 
 struct task *curtask;
 
@@ -131,11 +132,16 @@ mi_switch(enum task_state into_state) {
     curtask = next;
     task_unlink_state(curtask);
 
+    int spl = splhigh();
+
     /* Step 4: Actually perform the context switch */
     md_switch(&prev->pcb, &curtask->pcb);
 
     /* Note that if we are switching to a new thread, md_switch will not return
      * here. So anything we do here must also be done in mi_task_startup. */
+
+    /* Restore interrupts to whatever state they should be in for the curtask. */
+    splx(spl);
 }
 
 void
@@ -157,7 +163,9 @@ task_exit() {
  */
 void
 mi_task_startup(task_entry_fn fn, void *userdata) {
-    /* todo: DISABLE INTERRUPTS */
+    /* When we first reach a new task, we need to turn off all interrupts so
+     * that it may be preempted. */
+    spl0();
 
     fn(userdata);
 
