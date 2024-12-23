@@ -83,6 +83,10 @@ aarch64_trapentry(struct trapframe *tf) {
     printk("\nESR_EL1 = %p ELR_EL1 = %p\nSPSR_EL1 = %p FAR_EL1 = %p",
         tf->esr, tf->elr, tf->spsr, tf->far);
 
+    /* For now: Hang.
+     * TODO: shutdown? call another function in between...? */
+    for(;;) { }
+
 done:
     /* Restore interrupt state in curtask. 
      *
