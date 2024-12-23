@@ -1,13 +1,9 @@
 #ifndef K_DEVICES_PREEMPT_H
 #define K_DEVICES_PREEMPT_H
 
-#include <kern/lib.h>
+#include <kern/device.h>
 
-struct preempt_device {
-    const char *dev_name;
-    const char *dev_file;
-    uint64_t    dev_line;
-};
+DECLARE_DEVICE(preempt);
 
 /**
  * A function hook that should be regularly called by whatever timer we are

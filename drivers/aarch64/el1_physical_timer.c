@@ -31,6 +31,8 @@ el1_timer_irq(void *userdata) {
     return IACT_PREEMPT;
 }
 
+IMPL_DEVICE(preempt, el1_timer);
+
 void
 el1_timer_setup() {
     /* Register an IRQ for the timer firing. */
@@ -38,4 +40,6 @@ el1_timer_setup() {
 
     set_cntp_ctl_el0(1 << 0);
     set_cntp_tval_el0(get_cntfrq_el0() / preempt_goal_hz());
+
+    preempt_dev = &el1_timer;
 }

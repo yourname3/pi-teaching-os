@@ -1,10 +1,10 @@
 #ifndef K_DEVICES_INTC_H
 #define K_DEVICES_INTC_H
 
-struct intc_device {
-    void (*handle)(void);
-};
+#include <kern/device.h>
 
-extern struct intc_device *intc_dev;
+DECLARE_DEVICE(intc,
+    void (*handle)(void);
+);
 
 #endif

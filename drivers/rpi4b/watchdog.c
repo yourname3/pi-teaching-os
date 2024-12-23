@@ -57,10 +57,10 @@ wdog_reboot() {
     *pm_rstc = PM_PASSWORD | PM_RSTC_WRCFG_FULL_RESET;
 }
 
-struct power_attach wdog = {
+IMPL_DEVICE(power, bcm2711_watchdog,
     .shutdown = wdog_shutdown,
     .reboot = wdog_reboot
-};
+);
 
 void
 wdog_init() {
@@ -68,5 +68,5 @@ wdog_init() {
     pm_rstc = (volatile unsigned int*)(START_ADDR + PM_RSTC); 
     pm_rsts = (volatile unsigned int*)(START_ADDR + PM_RSTS);
 
-    the_power = &wdog;
+    power_dev = &bcm2711_watchdog;
 }

@@ -4,6 +4,7 @@
 #include <kern/devices/power.h>
 #include <kern/lib.h>
 #include <kern/irq.h>
+#include <kern/device.h>
 
 void load_devices();
 
@@ -24,15 +25,16 @@ main() {
     
     task_bootstrap();
 
-    struct task *second = task_new();
-    task_start(second, second_task, NULL);
+    //struct task *second = task_new();
+    //task_start(second, second_task, NULL);
 
     load_devices();
 
     printk("Welcome to the kernel.\n");
+    device_print_all();
     printk("kern> ");
 
     for(;;) {
-        printk("first task\n");
+        //printk("first task\n");
     }
 }
