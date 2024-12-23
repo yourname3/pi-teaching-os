@@ -128,6 +128,9 @@ printf_step(struct printf_runner *pr, char next) {
             pr->base = 16;
             printf_do_int(pr, va_arg(pr->va, long long));
             return;
+        case 's':
+            printf_do_print(pr, "", "", va_arg(pr->va, const char*));
+            return;
         default:
             /* For anything that isn't otherwise handled, treat it as essentially
              * '%%' -- i.e. we just print it as a plain character. */
