@@ -3,6 +3,7 @@
 #include <kern/lib.h>
 #include <kern/devices/interrupt_controller.h>
 #include <kern/task/task.h>
+#include <arch/spl.h>
 
 /* For other decoders of the ESR register, see:
  * https://github.com/google/aarch64-esr-decoder/blob/main/src/esr/mod.rs
@@ -21,6 +22,7 @@ aarch64_trapentry(struct trapframe *tf) {
      * us. We need to represent this in our curtask value. */
     int oldspl = curtask->spl;
     curtask->spl = 1;
+    curspl = 1;
     //printk("aarch64_trapentry\n");
 
     /* Last two bits indicate interrupt type. This is just a consequence of
@@ -87,4 +89,5 @@ done:
      * Note that interrupts are not actually off yet. But that is OK -- it
      * is the same logic as in spl0(). */
     curtask->spl = oldspl;
+    curspl = oldspl;
 }

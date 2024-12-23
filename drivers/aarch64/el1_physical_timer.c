@@ -28,9 +28,7 @@ el1_timer_irq(void *userdata) {
     set_cntp_ctl_el0(1);
     set_cntp_tval_el0(get_cntfrq_el0() / preempt_goal_hz());
 
-    preempt_fire();
-
-    return 0;
+    return IACT_PREEMPT;
 }
 
 void

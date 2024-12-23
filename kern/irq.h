@@ -38,4 +38,9 @@ void irq_register(size_t irq_id, irq_callback_fn fn, void *userdata);
 bool irq_fire(size_t irq_id, int *result);
 void irq_unregister(size_t irq_id);
 
+enum irq_action {
+    IACT_NONE = 0,
+    IACT_PREEMPT,
+};
+
 #endif

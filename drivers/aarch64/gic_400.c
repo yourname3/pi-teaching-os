@@ -3,6 +3,7 @@
 #include <kern/lib.h>
 #include <kern/irq.h>
 #include <kern/devices/interrupt_controller.h>
+#include <kern/devices/preempt.h>
 
 static volatile uint32_t *gicd_dist_base = 0;
 static volatile uint32_t *gicc_cpu_base = 0;
@@ -50,13 +51,18 @@ gic_400_handle(void) {
     /* Get IRQ number from the IAR register. */
     uint32_t irq = *gicc_iar & 0x2ff;
 
+    bool preempt = false;
+
     /* Handle IRQs in a loop until we see the "spurious" value of 1023,
      * which indicates that there are no more pending interrupts. */
     do {
         /* Fire any IRQ that we know of. */
         if(irq < irq_map_count) {
+            int iact;
             /* We don't really care about the result right now. */
-            irq_fire(irq_to_kirq_map[irq], NULL);
+            if(irq_fire(irq_to_kirq_map[irq], &iact)) {
+                if(iact == IACT_PREEMPT) { preempt = true; }
+            }
         }
 
         /* Signal the end of interrupt to the GIC. */
@@ -65,6 +71,10 @@ gic_400_handle(void) {
         /* Read the next interrupt from the IAR. */
         irq = *gicc_iar;
     } while(irq != 1023);
+
+    if(preempt) {
+        preempt_fire();
+    }
 }
 
 struct intc_device intc_gic_400 = {
