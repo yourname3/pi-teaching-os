@@ -5,7 +5,7 @@
 
 #include <kern/console/console.h>
 
-static inline _Noreturn void panic(const char *fmt, ...) { for(;;) { console_putstr(fmt); }}
+_Noreturn void panic(const char *fmt, ...);
 
 #define assert(condition) do { \
     if(!(condition)) { \
@@ -16,10 +16,14 @@ static inline _Noreturn void panic(const char *fmt, ...) { for(;;) { console_put
 /* Include some important libc functions. */
 #include <string.h>
 
+#include <stdarg.h>
+
 /**
  * Kernel print function.
  */
 void printk(const char *fmt, ...);
+
+void vprintk(const char *fmt, va_list va);
 
 void *kzalloc(size_t size);
 void *kzrealloc(void *ptr, size_t new_size);

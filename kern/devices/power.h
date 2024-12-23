@@ -6,6 +6,7 @@
 DECLARE_DEVICE(power,
     void (*shutdown)(void);
     void (*reboot)(void);
+    void (*panic)(void);
 );
 
 #endif

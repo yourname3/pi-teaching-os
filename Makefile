@@ -39,6 +39,7 @@ SRCS = \
 	kern/task/task.c \
 	kern/main/main.c \
 	kern/lib/printk.c \
+	kern/lib/panic.c \
 	kern/console/console.c \
 	kern/console/menu.c \
 	kern/devices/devices.c \

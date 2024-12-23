@@ -57,9 +57,20 @@ wdog_reboot() {
     *pm_rstc = PM_PASSWORD | PM_RSTC_WRCFG_FULL_RESET;
 }
 
+static void
+wdog_panic() {
+    /**
+     * On panic, we could shutdown or reboot, or do some other kind of operation.
+     * Here we will shutdown, as rebooting can simply lead to annoying loops when
+     * trying to debug and we do not need it for user friendliness.
+     */
+    wdog_shutdown();
+}
+
 IMPL_DEVICE(power, bcm2711_watchdog,
     .shutdown = wdog_shutdown,
-    .reboot = wdog_reboot
+    .reboot = wdog_reboot,
+    .panic = wdog_panic
 );
 
 void

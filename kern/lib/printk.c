@@ -11,12 +11,17 @@ printk_writefn(const char *data, size_t len, void *userdata) {
     console_putstr(data);
 }
 
+void
+vprintk(const char *fmt, va_list va) {
+    generic_printf(&printk_writefn, NULL, fmt, va);
+}
+
 void 
 printk(const char *fmt, ...) {
     va_list va;
     va_start(va, fmt);
 
-    generic_printf(&printk_writefn, NULL, fmt, va);
+    vprintk(fmt, va);    
 
     va_end(va);
 }

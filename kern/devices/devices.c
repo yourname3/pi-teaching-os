@@ -20,12 +20,20 @@ p_reboot_dummy() {
     panic("dummy reboot unsupported!");
 }
 
+static void
+p_panic_dummy() {
+    printk("dummy panic -- hanging kernel.\n");
+
+    for(;;);
+}
+
 DEFINE_DEVICE(power,
     .shutdown = p_shutdown_dummy,
-    .reboot = p_reboot_dummy
+    .reboot = p_reboot_dummy,
+    .panic = p_panic_dummy,
 );
 
-static void
+static void 
 ic_handle_dummy() {
 
 }
