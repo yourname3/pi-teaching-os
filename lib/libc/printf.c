@@ -18,6 +18,12 @@ struct printf_runner {
     int enable_base_prefix;
     long long base;
 
+    size_t field_width;
+    size_t precision;
+
+    bool in_precision;
+    bool zero_pad;
+
     size_t written;
 
     /**
@@ -62,12 +68,36 @@ printf_do_print(struct printf_runner *pr, const char *prefix1, const char *prefi
     size_t prefix2_len = strlen(prefix2);
     size_t what_len = strlen(what);
 
+    size_t total_len = prefix1_len + prefix2_len + what_len;
+
+    /* Compute the total len of the non-padded field. */
+    if(what_len < pr->precision) {
+        total_len += pr->precision - what_len;
+    }
+
+    /* If the total len is less than the field width, pad it with spaces or
+     * zeroes depending on the setting. */
+    if(total_len < pr->field_width) {
+        char pad = pr->zero_pad ? '0' : ' ';
+        for(size_t i = 0; i < (pr->field_width - total_len); ++i) {
+            printf_push_char(pr, pad);
+        }
+    }
+
     for(size_t i = 0; i < prefix1_len; ++i) {
         printf_push_char(pr, prefix1[i]);
     }
 
     for(size_t i = 0; i < prefix2_len; ++i) {
         printf_push_char(pr, prefix2[i]);
+    }
+
+    /* For integer conversions, we print out "precision - what_len" zeroes
+     * before the rest of the number. */
+    if(what_len < pr->precision) {
+        for(size_t i = 0; i < (pr->precision - what_len); ++i) {
+            printf_push_char(pr, '0');
+        }
     }
 
     for(size_t i = 0; i < what_len; ++i) {
@@ -91,7 +121,12 @@ printf_do_uint(struct printf_runner *pr, unsigned long long value, const char *s
      * writing to it, so we'll get that one extra char for the terminator. */
     char *at = &buf[INT_BUF_SIZE - 1];
 
-    do {
+    /* Once value hits 0, we're done.
+     * Note that in the case of 0, this loop generates an empty string. With
+     * default precision = 1, we nonetheless print out 0. But if the user for
+     * some reason sets precision = 0, we will print out nothing--and that
+     * is the intended behavior. */
+    while(value > 0) {
         /* Back up in the string to "allocate" a char. */
         --at;
 
@@ -100,8 +135,7 @@ printf_do_uint(struct printf_runner *pr, unsigned long long value, const char *s
 
         /* Make the number smaller so we can read the higher digits. */
         value /= pr->base;
-    } while(value > 0); /* Once value hits 0, we're done. */
-
+    } 
     const char *base_prefix = "";
     if(pr->enable_base_prefix) {
         if(pr->base == 16) base_prefix = "0x";
@@ -132,6 +166,12 @@ printf_begin_fmt(struct printf_runner *pr) {
     /* Setup default formatting options. */
     pr->enable_base_prefix = 0;
     pr->base = 10;
+
+    pr->field_width = 0;
+    pr->precision = 0;
+    pr->in_precision = false;
+
+    pr->zero_pad = false;
 }
 
 static void
@@ -157,6 +197,50 @@ printf_step(struct printf_runner *pr, char next) {
         case '#':
             pr->enable_base_prefix = 1;
             return;
+
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
+            if(pr->in_precision) {
+                /* If we're computing the precision field, always just multiply
+                 * and add (performing string->int conversion). */
+                pr->precision *= 10;
+                pr->precision += (next - '0');
+            }
+            else {
+                /* If we're not in the precision field, we're in the field width
+                 * field.
+                 * - If the field width is 0, that means we haven't read any
+                 *   digits for it yet. In that case, '0' actually indicates
+                 *   to zero pad.
+                 * - Otherwise, we simply convert to int as usual. */
+                if(pr->field_width == 0 && next == '0') {
+                    pr->zero_pad = true;
+                }
+                else {
+                    pr->field_width *= 10;
+                    pr->field_width += (next - '0');
+                }
+            }
+
+            break;
+        }
+
+        case '.':
+            /* If we see a '.', that means we need to start the precision field.
+             * In that case, we replace the default value of 1 with whtaever
+             * is in the field, which means we have to intialize pr->precision
+             * to 0 so that the logic above will work. */
+            pr->precision = 0;
+            pr->in_precision = true;
+            break;
 
         case 'd': pr->base = 10; printf_do_int(pr, va_arg(pr->va, long long)); return;
         case 'p':
