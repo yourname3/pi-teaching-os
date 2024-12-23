@@ -148,18 +148,18 @@ irq_unregister(size_t irq_id) {
     size_t idx = irq_id % irq_map.allocated;
 
     for(size_t i = 0; i < irq_map.allocated; ++i) {
-        if(irq_map.entries[i].id == irq_id) {
+        if(irq_map.entries[idx].id == irq_id) {
             /* Clear the entry with a tombstone.
              * TODO: Consider rehashing, but shouldn't really be necessary. */
-            irq_map.entries[i].id = IRQ_TOMBSTONE;
-            irq_map.entries[i].fn = NULL;
-            irq_map.entries[i].userdata = NULL;
+            irq_map.entries[idx].id = IRQ_TOMBSTONE;
+            irq_map.entries[idx].fn = NULL;
+            irq_map.entries[idx].userdata = NULL;
             irq_map.allocated -= 1;
 
             return;
         }
 
-        if(irq_map.entries[i].id == IRQ_NULL) {
+        if(irq_map.entries[idx].id == IRQ_NULL) {
             /* We can end the search early. */
             return;
         }
