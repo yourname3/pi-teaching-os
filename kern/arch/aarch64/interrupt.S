@@ -74,6 +74,17 @@ finish_trap:
     mov x0, sp
     bl aarch64_trapentry
 
+    /* We must restore the value of elr and spsr before we eret. */
+    ldp x0, x1, [sp, #16 * 16]
+    ldp x2, x3, [sp, #16 * 17]
+
+    // No need to restore esr or far. TODO: Maybe store these in a more efficient
+    // order in the trapframe.
+    // msr esr_el1, x0
+    msr elr_el1, x1
+    msr spsr_el1, x2
+    // msr far_el1, x3
+
     /* restore all the registers */
 
     /* TODO: Store floating point registers. */
