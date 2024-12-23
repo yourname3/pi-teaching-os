@@ -67,13 +67,13 @@ kernel8.img: kernel8.elf
 compile/symlinks/arch compile/symlinks/arch.lock: .config
 	@mkdir -p compile/symlinks
 	@touch compile/symlinks/arch.lock
-	@ln -s $(abspath kern/arch/$(ARCH)) compile/symlinks/arch
+	@if ! [ -e compile/symlinks/arch ]; then ln -sT $(abspath kern/arch/$(ARCH)) compile/symlinks/arch; fi
 	@echo "GEN     $@"
 
 compile/symlinks/device compile/symlinks/device.lock: .config
 	@mkdir -p compile/symlinks
 	@touch compile/symlinks/device.lock
-	@ln -s $(abspath drivers/$(DEVICE)) compile/symlinks/device
+	@if ! [ -e compile/symlinks/device ]; then ln -sT $(abspath drivers/$(DEVICE)) compile/symlinks/device; fi
 	@echo "GEN     $@"
 
 kernel8.elf: $(LINK) $(OBJS)
