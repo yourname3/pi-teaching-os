@@ -3,12 +3,24 @@
 #include <kern/lib.h>
 #include <kern/irq.h>
 
-extern uint64_t read_cntfrq(void);
-
-extern void setup_timer_tval(uint64_t val);
-extern void setup_timer_irq();
-
 static uint64_t ticks_per_wait;
+
+static inline void
+set_cntp_tval_el0(uint64_t val) {
+    __asm__("msr cntp_tval_el0, %0" : : "r" (val));
+}
+
+static inline void
+set_cntp_ctl_el0(uint64_t val) {
+    __asm__("msr cntp_ctl_el0, %0" : : "r" (val));
+}
+
+static inline uint64_t
+get_cntfrq_el0() {
+    uint64_t result;
+    __asm__("mrs %0, cntfrq_el0" : "=r" (result));
+    return result;
+}
 
 int
 el1_timer_irq(void *userdata) {
@@ -16,10 +28,8 @@ el1_timer_irq(void *userdata) {
 
     printk("el1 timer fired\n");
 
-    __asm__(
-        "mov x0, #0\n"
-        "msr cntp_ctl_el0, x0\n"
-    );
+    set_cntp_ctl_el0(1);
+    set_cntp_tval_el0(get_cntfrq_el0());
 
     return 0;
 }
@@ -29,12 +39,12 @@ el1_timer_setup() {
     /* Register an IRQ for the timer firing. */
     irq_register(IRQ_EL1_PHYSICAL_TIMER, el1_timer_irq, NULL);
 
-    uint64_t freq = read_cntfrq();
+    uint64_t freq = get_cntfrq_el0();
     uint64_t desired_ms_per_tick = 20;
     /* milliseconds per timer fire */
     ticks_per_wait = freq * desired_ms_per_tick / 1000;
     printk("el1 timer: freq = %d ticks = %d\n", freq, ticks_per_wait);
 
-    setup_timer_irq();
-    setup_timer_tval(ticks_per_wait);
+    set_cntp_ctl_el0(1 << 0);
+    set_cntp_tval_el0(freq);
 }
