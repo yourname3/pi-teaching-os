@@ -93,6 +93,7 @@ finish_trap:
     ldp x25, x26, [sp, #16 * 13]
     ldp x27, x28, [sp, #16 * 14]
     ldp x29, x30, [sp, #16 * 15]
+    ldr x0, [sp, #8]
 
     /* Free stack space allocated in 'define_entry' */
     add sp, sp, #288
