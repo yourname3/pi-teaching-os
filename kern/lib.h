@@ -3,8 +3,6 @@
 
 /* lib.h -- defines common kernel library functions. */
 
-#include <kern/console/console.h>
-
 _Noreturn void panic(const char *fmt, ...);
 
 #define assert(condition) do { \

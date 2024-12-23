@@ -32,7 +32,7 @@
 
 
 
-#include <kern/console/console.h>
+#include <kern/devices/console.h>
 #include <drivers/generic/con_vt100.h>
 
 #include <drivers/aarch64/el1_physical_timer.h>
@@ -40,21 +40,13 @@
 
 #include <kern/irq.h>
 
-extern void uart_writeByteBlockingActual(char ch, void *unused);
-extern bool uart_readByte(char *out, void *unused);
-
-con_vt100 miniuart = {
-    .vt100_putc = uart_writeByteBlockingActual,
-    .vt100_poll = uart_readByte,
-};
-console_io_attach miniuart_console = {0};
+extern void miniuart_init();
 
 extern void wdog_init();
 
 void
 load_devices() {
-    create_vt100_console_attachment(&miniuart_console, &miniuart);
-    console_attach(&miniuart_console);
+    miniuart_init();
 
     gic_400_init(0x40000000 + (0xFF840000 - 0xC0000000), 32 + 96);
     //gic_400_assign_irq_cpu(30, 0);

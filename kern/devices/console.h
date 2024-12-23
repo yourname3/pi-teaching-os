@@ -18,6 +18,7 @@
 // layers as well as easily make use of the console itself.
 
 #include <kern/types.h>
+#include <kern/device.h>
 
 #define CON_ACT_CHAR        0x0000
 #define CON_ACT_BACKSPACE   0x0100
@@ -41,33 +42,16 @@
  * 8 bits, in the MSB, for the tag (e.g. CON_ACT_BACKSPACE), plus 8 more bits,
  * for the LSB, which store character data in the case of a CON_ACT_CHAR.
  */
-typedef uint16_t con_poll_result;
 
-typedef struct console_io_attach {
-    void *user_data;
+DECLARE_DEVICE(console,
+    void (*con_putc)(char c);
+    bool (*con_poll)(uint16_t *out);
 
-    bool (*con_init)(void* user_data);
-    void (*con_putc)(char c, void *user_data);
-    bool (*con_poll)(con_poll_result *out, void *user_data);
-
-    void (*con_clear)(void* user_data);
-    void (*con_clear_line)(void* user_data);
-    void (*con_cursor_left)(int amount, void *user_data);
-    void (*con_cursor_right)(int amount, void *user_data);
-    void (*con_backspace)(void* user_data);
-
-    struct console_io_attach *next;
-} console_io_attach;
-
-void console_attach(console_io_attach *attachment);
-void console_putc(char c);
-void console_putstr(const char *str);
-bool console_getc(char*);
-
-bool console_poll(con_poll_result *out);
-
-bool dummy_init(void *user_data);
-void dummy_putc(char c, void *user_data);
-bool dummy_poll(con_poll_result *out, void *user_data);
+    void (*con_clear)(void);
+    void (*con_clear_line)(void);
+    void (*con_cursor_left)(int amount);
+    void (*con_cursor_right)(int amount);
+    void (*con_backspace)(void);
+);
 
 #endif

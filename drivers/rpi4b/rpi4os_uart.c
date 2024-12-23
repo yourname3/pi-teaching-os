@@ -8,6 +8,8 @@
 
 #include <kern/types.h>
 
+#include <drivers/generic/con_vt100.h>
+
 enum {
     //PERIPHERAL_BASE 0xFE000000,
     PERIPHERAL_BASE = 0x40000000 + (0xFE000000 - 0xC0000000), // memory mapped
@@ -92,14 +94,14 @@ void uart_init() {
 
 unsigned int uart_isWriteByteReady() { return mmio_read(AUX_MU_LSR_REG) & 0x20; }
 
-void uart_writeByteBlockingActual(char ch, void *unused) {
+void uart_writeByteBlockingActual(char ch) {
     while (!uart_isWriteByteReady()); 
     mmio_write(AUX_MU_IO_REG, (unsigned int)ch);
 }
 
 unsigned int uart_isReadByteReady()  { return mmio_read(AUX_MU_LSR_REG) & 0x01; }
 
-bool uart_readByte(char *out, void *unused) {
+bool uart_readByte(char *out) {
     if(uart_isReadByteReady()) {
         *out = (char)mmio_read(AUX_MU_IO_REG);
         return true;
@@ -115,3 +117,14 @@ bool uart_readByte(char *out, void *unused) {
 //       uart_writeByteBlockingActual(*buffer++);
 //    }
 //}
+
+IMPL_DEVICE(con_vt100, miniuart,
+    .putc = uart_writeByteBlockingActual,
+    .poll = uart_readByte
+);
+
+void
+miniuart_init() {
+    con_vt100_dev = &miniuart;
+    con_vt100_init();
+}

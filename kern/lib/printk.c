@@ -1,14 +1,17 @@
 #include <kern/lib.h>
 
-#include <kern/console/console.h>
 #include <printf.h>
+#include <kern/devices/console.h>
 
 static void
 printk_writefn(const char *data, size_t len, void *userdata) {
     (void)userdata;
     (void)len;
 
-    console_putstr(data);
+    while(*data) {
+        console_dev->con_putc(*data);
+        ++data;
+    }
 }
 
 void

@@ -2,19 +2,19 @@
 #define D_CON_VT100_H
 
 #include <kern/types.h>
-#include <kern/console/console.h>
+#include <kern/devices/console.h>
 
-typedef struct con_vt100 {
-    void *user_data;
+#include <kern/device.h>
 
-    bool (*vt100_init)(void *user_data);
-    void (*vt100_putc)(char c, void *user_data);
-    bool (*vt100_poll)(char *out, void *user_data);
+/* Create a wrapper DEVICE for the console. When we initialize our wrapper,
+ * we take over console_dev, and a different device can drive the con_vt100_dev.
+ */
 
-    char buf[16];
-    size_t buf_len;
-} con_vt100;
+DECLARE_DEVICE(con_vt100,
+    void (*putc)(char c);
+    bool (*poll)(char *out);
+)
 
-void create_vt100_console_attachment(console_io_attach *io, con_vt100 *vt100);
+void con_vt100_init();
 
 #endif
