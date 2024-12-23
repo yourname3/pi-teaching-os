@@ -153,6 +153,11 @@ printf_step(struct printf_runner *pr, char next) {
 
     /* Now we know we're in_fmt. So, handle all the possible formatting options. */
     switch(next) {
+        /* # indicates to print the number out with a base prefix. */
+        case '#':
+            pr->enable_base_prefix = 1;
+            return;
+
         case 'd': pr->base = 10; printf_do_int(pr, va_arg(pr->va, long long)); return;
         case 'p':
             void *arg = va_arg(pr->va, void*);

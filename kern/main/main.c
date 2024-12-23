@@ -34,7 +34,8 @@ main() {
     device_print_all();
     printk("kern> ");
 
-    printk("abcd abcd abcd abcd abcd abcd 1234 1234 1234 1234 1234 1234 1234 1234 1234 1234 1234 %d\n", 5000);
+    int x = 30;
+    printk("x = %d, x = %x, x = %#x, x = %p\n", x, x, x, x);
 
     for(;;) {
         //printk("first task\n");
