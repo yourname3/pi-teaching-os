@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#define PRINTF_RUNNER_BUFSIZE 32
+
 /**
  * Defines the structure used to implement generic_printf. Keeps track of the
  * state so that the implementation is somewhat easy to follow.
@@ -17,7 +19,42 @@ struct printf_runner {
     long long base;
 
     size_t written;
+
+    /**
+     * Buffer the output that we are creating in printf. This allows us to call
+     * the printf_write_fn with more data, which should result in less function
+     * call overhead.
+     */
+    char buf[PRINTF_RUNNER_BUFSIZE];
+    size_t buflen;
 };
+
+/**
+ * Writes whatever is in the pr->buf out. Necessary when the buffer is full
+ * or when we reach the end of the formatting process.
+ */
+static void
+printf_flush(struct printf_runner *pr) {
+    pr->buf[pr->buflen] = '\0';
+    pr->write(pr->buf, pr->buflen, pr->userdata);
+    pr->written += pr->buflen;
+    pr->buflen = 0;
+}
+
+/**
+ * Push a single char to the internal buffer and, if the buffer is full, empty
+ * the buffer (calling pr->write).
+ */
+static void
+printf_push_char(struct printf_runner *pr, char c) {
+    pr->buf[pr->buflen++] = c;
+
+    /* The buffer is full when there is only room for a NUL terminator left
+     * in the buffer. */
+    if(pr->buflen + 1 >= PRINTF_RUNNER_BUFSIZE) {
+        printf_flush(pr);
+    }
+}
 
 static void
 printf_do_print(struct printf_runner *pr, const char *prefix1, const char *prefix2, const char *what) {
@@ -25,11 +62,17 @@ printf_do_print(struct printf_runner *pr, const char *prefix1, const char *prefi
     size_t prefix2_len = strlen(prefix2);
     size_t what_len = strlen(what);
 
-    pr->write(prefix1, prefix1_len, pr->userdata);
-    pr->write(prefix2, prefix2_len, pr->userdata);
-    pr->write(what, what_len, pr->userdata);
+    for(size_t i = 0; i < prefix1_len; ++i) {
+        printf_push_char(pr, prefix1[i]);
+    }
 
-    pr->written += prefix1_len + prefix2_len + what_len;
+    for(size_t i = 0; i < prefix2_len; ++i) {
+        printf_push_char(pr, prefix2[i]);
+    }
+
+    for(size_t i = 0; i < what_len; ++i) {
+        printf_push_char(pr, what[i]);
+    }
 
     /* Whenever we do a print, reset the in_fmt flag to false. */
     pr->in_fmt = 0;
@@ -104,8 +147,7 @@ printf_step(struct printf_runner *pr, char next) {
         }
 
         /* Print the character */
-        char buf[2] = { next, '\0' };
-        printf_do_print(pr, "", "", buf);
+        printf_push_char(pr, next);
         return;
     }
 
@@ -133,11 +175,10 @@ printf_step(struct printf_runner *pr, char next) {
             return;
         default:
             /* For anything that isn't otherwise handled, treat it as essentially
-             * '%%' -- i.e. we just print it as a plain character. */
-            {
-                char buf[2] = { next, '\0' };
-                printf_do_print(pr, "", "", buf);
-            }
+             * '%%' -- i.e. we just print it as a plain character. Note that this
+             * means printf will accept formatting specifiers before the % but
+             * that's fine. */
+            printf_push_char(pr, next);
             return;
     }
 }
@@ -151,6 +192,8 @@ generic_printf(printf_write_fn write, void *userdata, const char *fmt, va_list a
         .in_fmt = 0,
 
         .written = 0,
+
+        .buflen = 0,
     };
 
     va_copy(pr.va, args);
@@ -162,6 +205,9 @@ generic_printf(printf_write_fn write, void *userdata, const char *fmt, va_list a
         printf_step(&pr, *fmt);
         ++fmt;
     }
+
+    /* We must flush the buffer at the end. */
+    printf_flush(&pr);
 
     /* Return the amount that was written. */
     return pr.written;
