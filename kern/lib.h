@@ -9,7 +9,7 @@ _Noreturn void panic(const char *fmt, ...);
 
 #define assert(condition) do { \
     if(!(condition)) { \
-        panic("assertion failed: " #condition); \
+        panic("in %s:%d: %s:\n  assertion failed: " #condition, __FILE__, __LINE__, __func__); \
     } \
 } while(0)
 
