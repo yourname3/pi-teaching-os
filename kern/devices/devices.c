@@ -1,4 +1,5 @@
 #include "power.h"
+#include "interrupt_controller.h"
 
 #include <kern/lib.h>
 #include <kern/console/console.h>
@@ -21,3 +22,14 @@ struct power_attach power_dummy = {
 };
 
 struct power_attach *the_power = &power_dummy;
+
+static void
+ic_handle_dummy() {
+
+}
+
+struct intc_device intc_dummy = {
+    .handle = ic_handle_dummy
+};
+
+struct intc_device *intc_dev = &intc_dummy;

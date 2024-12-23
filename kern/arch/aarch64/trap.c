@@ -1,6 +1,7 @@
 #include "trapframe.h"
 
 #include <kern/lib.h>
+#include <kern/devices/interrupt_controller.h>
 
 /* For other decoders of the ESR register, see:
  * https://github.com/google/aarch64-esr-decoder/blob/main/src/esr/mod.rs
@@ -8,13 +9,14 @@
 
 void
 aarch64_irq(struct trapframe *tf) {
-    /* Do nothing right now. */
-    printk("IRQ occurred.\n");
+    /* In the case of IRQs, we simply defer to whatever interrupt controller
+     * driver is currently setup. */
+    intc_dev->handle();
 }
 
 void
 aarch64_trapentry(struct trapframe *tf) {
-    printk("aarch64_trapentry\n");
+    //printk("aarch64_trapentry\n");
 
     /* Last two bits indicate interrupt type. This is just a consequence of
      * how we set up the t able in interrupt.S -- we chose the numbers 0-15
