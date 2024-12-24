@@ -69,14 +69,20 @@ DEFINE_DEVICE(console,
     .con_backspace = con_backspace_dummy
 );
 
-#define PRINT_DEVICE(devname) \
-printk("  %s = %s (%s:%d)\n", #devname "_dev", devname ## _dev->dev_name, devname ## _dev->dev_file, devname ## _dev->dev_line)
+#define PRINT_DEVICE(dev) \
+printk("  %s (%s:%d)\n", \
+    dev->name, \
+    dev->file, \
+    dev->line)
+
+struct dev_header *device_list;
 
 void
 device_print_all() {
     printk("loaded drivers:\n");
-    PRINT_DEVICE(power);
-    PRINT_DEVICE(intc);
-    PRINT_DEVICE(preempt);
-    PRINT_DEVICE(console);
+    struct dev_header *dev = device_list;
+    while(dev) {
+        PRINT_DEVICE(dev);
+        dev = dev->next;
+    }
 }

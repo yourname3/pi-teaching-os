@@ -109,7 +109,7 @@ gic_400_init(uintptr_t base_addr, size_t total_gic_irqs) {
     volatile uint32_t *gicc_ctlr = gicc_cpu_base + 0;
     volatile uint32_t *gicc_prio = gicc_cpu_base + 4;
 
-    intc_dev = &gic_400;
+    INSTALL_DEVICE(intc, gic_400);
 
     /* Allocate an array allowing us to map our internal IRQ numbers to the
      * kernel IRQ numbers. By default, these are all IRQ_NULL, which is

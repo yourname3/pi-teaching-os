@@ -125,6 +125,7 @@ IMPL_DEVICE(con_vt100, miniuart,
 
 void
 miniuart_init() {
-    con_vt100_dev = &miniuart;
     con_vt100_init();
+
+    INSTALL_DEVICE(con_vt100, miniuart);
 }

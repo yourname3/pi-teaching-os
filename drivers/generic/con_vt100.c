@@ -73,5 +73,5 @@ DEFINE_DEVICE(con_vt100);
 
 void
 con_vt100_init() {
-    console_dev = &con_vt100;
+    INSTALL_DEVICE(console, con_vt100);
 }

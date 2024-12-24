@@ -41,5 +41,5 @@ el1_timer_setup() {
     set_cntp_ctl_el0(1 << 0);
     set_cntp_tval_el0(get_cntfrq_el0() / preempt_goal_hz());
 
-    preempt_dev = &el1_timer;
+    INSTALL_DEVICE(preempt, el1_timer);
 }

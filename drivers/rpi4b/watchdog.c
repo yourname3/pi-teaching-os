@@ -79,5 +79,5 @@ wdog_init() {
     pm_rstc = (volatile unsigned int*)(START_ADDR + PM_RSTC); 
     pm_rsts = (volatile unsigned int*)(START_ADDR + PM_RSTS);
 
-    power_dev = &bcm2711_watchdog;
+    INSTALL_DEVICE(power, bcm2711_watchdog);
 }
