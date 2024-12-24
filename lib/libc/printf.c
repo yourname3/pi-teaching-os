@@ -23,6 +23,7 @@ struct printf_runner {
 
     bool in_precision;
     bool zero_pad;
+    bool right_pad;
 
     size_t written;
 
@@ -77,7 +78,7 @@ printf_do_print(struct printf_runner *pr, const char *prefix1, const char *prefi
 
     /* If the total len is less than the field width, pad it with spaces or
      * zeroes depending on the setting. */
-    if(total_len < pr->field_width) {
+    if(total_len < pr->field_width && !pr->right_pad) {
         char pad = pr->zero_pad ? '0' : ' ';
         for(size_t i = 0; i < (pr->field_width - total_len); ++i) {
             printf_push_char(pr, pad);
@@ -102,6 +103,14 @@ printf_do_print(struct printf_runner *pr, const char *prefix1, const char *prefi
 
     for(size_t i = 0; i < what_len; ++i) {
         printf_push_char(pr, what[i]);
+    }
+
+    /* Right pad if needed. */
+    if(pr->right_pad) {
+        /* Note that right padding is always with spaces. */
+        for(size_t i = 0; i < (pr->field_width - total_len); ++i) {
+            printf_push_char(pr, ' ');
+        }
     }
 
     /* Whenever we do a print, reset the in_fmt flag to false. */
@@ -172,6 +181,7 @@ printf_begin_fmt(struct printf_runner *pr) {
     pr->in_precision = false;
 
     pr->zero_pad = false;
+    pr->right_pad = false;
 }
 
 static void
@@ -196,6 +206,10 @@ printf_step(struct printf_runner *pr, char next) {
         /* # indicates to print the number out with a base prefix. */
         case '#':
             pr->enable_base_prefix = 1;
+            return;
+
+        case '-':
+            pr->right_pad = true;
             return;
 
         case '0':

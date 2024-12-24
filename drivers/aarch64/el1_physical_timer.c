@@ -31,7 +31,7 @@ el1_timer_irq(void *userdata) {
     return IACT_PREEMPT;
 }
 
-IMPL_DEVICE(preempt, el1_timer);
+IMPL_DEVICE(preempt, aarch64_el1_pns_timer);
 
 void
 el1_timer_setup() {
@@ -41,5 +41,5 @@ el1_timer_setup() {
     set_cntp_ctl_el0(1 << 0);
     set_cntp_tval_el0(get_cntfrq_el0() / preempt_goal_hz());
 
-    INSTALL_DEVICE(preempt, el1_timer);
+    INSTALL_DEVICE(preempt, aarch64_el1_pns_timer);
 }

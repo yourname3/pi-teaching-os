@@ -70,7 +70,7 @@ DEFINE_DEVICE(console,
 );
 
 #define PRINT_DEVICE(dev) \
-printk("  %s (%s:%d)\n", \
+printk("  %-24s (%s:%d)\n", \
     dev->name, \
     dev->file, \
     dev->line)
