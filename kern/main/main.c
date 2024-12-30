@@ -25,14 +25,14 @@ main() {
     
     task_bootstrap();
 
-    //struct task *second = task_new();
-    //task_start(second, second_task, NULL);
-
     load_devices();
 
     printk("Welcome to the kernel.\n");
     device_print_all();
     printk("kern> \n");
+
+    struct task *second = task_new();
+    task_start(second, second_task, NULL);
 
     //int x = 30;
     //printk("x = %d, x = %x, x = %#x, x = %p\n", x, x, x, x);
@@ -41,6 +41,6 @@ main() {
     printk("%.5d %.4d %.3d %.2d %.1d %.0d\n", 5, 5, 5, 5, 5, 5);
 
     for(;;) {
-        //printk("first task\n");
+        printk("first task\n");
     }
 }

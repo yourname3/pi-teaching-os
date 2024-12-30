@@ -114,7 +114,7 @@ gic_400_init(uintptr_t base_addr, size_t total_gic_irqs) {
     /* Allocate an array allowing us to map our internal IRQ numbers to the
      * kernel IRQ numbers. By default, these are all IRQ_NULL, which is
      * perfect--all our internal IRQs fire no kernel IRQs. */
-    irq_to_kirq_map = kzalloc_or_die(total_gic_irqs,
+    irq_to_kirq_map = kzalloc_or_die(total_gic_irqs * sizeof(*irq_to_kirq_map),
         "failed to allocate gic_400 irq_to_kirq map");
     irq_map_count = total_gic_irqs;
 
