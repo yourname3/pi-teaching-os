@@ -79,6 +79,7 @@ compile/symlinks/device compile/symlinks/device.lock: .config
 kernel8.elf: $(LINK) $(OBJS)
 	@$(CC) $(OBJS) -o $@ -ffreestanding -nostdlib -T $(LINK)
 	@echo "LD      $@"
+	@$(SIZE) $@
 
 compile/%.c.ko: %.c | $(DIRS) compile/symlinks/arch compile/symlinks/device
 	@$(CC) -c $< -o $@ $(CFLAGS)
