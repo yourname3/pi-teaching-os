@@ -168,7 +168,7 @@ printf_begin_fmt(struct printf_runner *pr) {
     pr->base = 10;
 
     pr->field_width = 0;
-    pr->precision = 0;
+    pr->precision = 1;
     pr->in_precision = false;
 
     pr->zero_pad = false;
