@@ -108,6 +108,9 @@ qemu-debug: kernel8.img
 gdb: kernel8.img
 	$(GDB) kernel8.elf
 
+raspbootin: kernel8.img
+	$(RASPBOOTCOM) $(RASPBOOTDEV) kernel8.img
+
 .PHONY: clean qemu qemu-debug
 
 -include $(OBJS:.ko=.d)
