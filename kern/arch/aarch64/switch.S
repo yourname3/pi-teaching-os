@@ -25,8 +25,6 @@ aarch64_switch:
 
     sub sp, sp, #256 // Allocate enough space for 32 8-bit registers (aligned to 16 bytes)
 
-    
-
     // Store all the 64 bit registers onto the stack.
     str x30, [sp, #0xF0]
     str x29, [sp, #0xE8]
@@ -60,24 +58,16 @@ aarch64_switch:
     str x1,  [sp, #0x08]
     str x0,  [sp, #0x00]
 
-    
-
     // Use x2 to copy to and from sp.
     mov x2, sp
 
     // Store the final value of sp into the previous task struct (pointed to by x0).
     str x2, [x0, #0]
 
-    
-
     // Load sp from the new task struct (pointed to by x1).
     ldr x2, [x1, #0]
 
-    // ON REAL HARDWARE: We make it here...
-
     mov sp, x2
-
-    // but we don't make it here... (or at least we can't call aarch64_halfway from here.)
 
     // Reload all the state registers 
     ldr x30, [sp, #0xF0]
