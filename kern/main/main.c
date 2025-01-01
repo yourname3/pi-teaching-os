@@ -10,7 +10,7 @@ void load_devices();
 
 void second_task(void *userdata) {
     for(;;) {
-        printk("second task\n");
+        printk("second task\r\n");
     }
 }
 
@@ -25,22 +25,16 @@ main() {
     
     task_bootstrap();
 
-    //struct task *second = task_new();
-    //task_start(second, second_task, NULL);
-
     load_devices();
 
     printk("Welcome to the kernel.\n");
     device_print_all();
     printk("kern> \n");
 
-    //int x = 30;
-    //printk("x = %d, x = %x, x = %#x, x = %p\n", x, x, x, x);
-    printk("%5d %05d %.5d %5.2d\n", 3, 3, 3, 3);
-    printk("%.5d %.4d %.3d %.2d %.1d %.0d\n", 0, 0, 0, 0, 0, 0);
-    printk("%.5d %.4d %.3d %.2d %.1d %.0d\n", 5, 5, 5, 5, 5, 5);
+    struct task *second = task_new();
+    task_start(second, second_task, NULL);
 
     for(;;) {
-        //printk("first task\n");
+        printk("first task\r\n");
     }
 }

@@ -79,6 +79,7 @@ compile/symlinks/device compile/symlinks/device.lock: .config
 kernel8.elf: $(LINK) $(OBJS)
 	@$(CC) $(OBJS) -o $@ -ffreestanding -nostdlib -T $(LINK)
 	@echo "LD      $@"
+	@$(SIZE) $@
 
 compile/%.c.ko: %.c | $(DIRS) compile/symlinks/arch compile/symlinks/device
 	@$(CC) -c $< -o $@ $(CFLAGS)
@@ -106,6 +107,9 @@ qemu-debug: kernel8.img
 
 gdb: kernel8.img
 	$(GDB) kernel8.elf
+
+raspbootin: kernel8.img
+	$(RASPBOOTCOM) $(RASPBOOTDEV) kernel8.img
 
 .PHONY: clean qemu qemu-debug
 

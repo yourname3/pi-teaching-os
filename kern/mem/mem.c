@@ -3,7 +3,8 @@
 #include <kern/lib.h>
 
 /* TODO: Implement real kernel allocator? */
-static char bump_heap[16384];
+/* The initial heap must be aligned to 16 bytes for our other alignment logic to work. */
+static char bump_heap[16384] __attribute__((aligned (16)));
 static char *heap_next = bump_heap;
 
 void *kzalloc(size_t size) {

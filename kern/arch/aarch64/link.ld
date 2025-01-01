@@ -50,6 +50,14 @@ SECTIONS
     }
     _end = .;
 
-   /DISCARD/ : { *(.comment) *(.gnu*) *(.note*) *(.eh_frame*) }
+   /DISCARD/ : {
+      *(.comment)
+      *(.note*)
+      *(.eh_frame*)
+      *(.discard)
+      *(.discard.*)
+      *(.interp .dynamic)
+      *(.dynsym .dynstr .hash)
+   }
 }
 __bss_size = (__bss_end - __bss_start)>>3;
