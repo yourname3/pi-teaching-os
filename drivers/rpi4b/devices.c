@@ -55,5 +55,5 @@ load_devices() {
 
     wdog_init();
 
-    //el1_timer_setup();
+    el1_timer_setup();
 }
