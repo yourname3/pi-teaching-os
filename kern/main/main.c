@@ -10,7 +10,8 @@ void load_devices();
 
 void second_task(void *userdata) {
     for(;;) {
-        printk("second task\n");
+        printk("**** second task\r\n");
+        task_yield();
     }
 }
 
@@ -41,6 +42,7 @@ main() {
     printk("%.5d %.4d %.3d %.2d %.1d %.0d\n", 5, 5, 5, 5, 5, 5);
 
     for(;;) {
-        printk("first task\n");
+        printk("**** first task\r\n");
+        task_yield();
     }
 }

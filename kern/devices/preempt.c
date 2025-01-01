@@ -4,6 +4,7 @@
 
 void
 preempt_fire() {
+    printk("preempt!\r\n");
     /* The most important task for the timer in preemptive multitasking:
      * Regularly yield the current thread. */
     task_yield();

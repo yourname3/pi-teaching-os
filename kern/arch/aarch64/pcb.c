@@ -36,11 +36,27 @@ md_init_new_task_pcb(
 
     memcpy(stackdata + 0x00, &entry_fn, 8);
     memcpy(stackdata + 0x08, &userdata, 8);
+
+    printk("md_init_new_task_pcb:\r\n    entry_fn = %p\r\n    userdata = %p\r\n    task_startup = %p\r\n", entry_fn, userdata, task_startup);
 }
 
 extern void aarch64_switch(struct pcb *, struct pcb *);
 
 void
+aarch64_halfway(struct pcb *old_pcb, struct pcb *new_pcb, uintptr_t new_sp) {
+    printk("MADE IT TO CHECKPOINT 5\r\n");
+    printk("old_pcb->sp = %p new_pcb->sp = %p\r\n", old_pcb->sp, new_pcb->sp);
+    printk("new_pcb[x0] = %p\r\n", ((uintptr_t*)(new_pcb->sp))[0]);
+    printk("new_pcb[x1] = %p\r\n", ((uintptr_t*)(new_pcb->sp))[1]);
+    printk("new_pcb[lr] = %p\r\n", ((uintptr_t*)(new_pcb->sp))[30]);
+    printk("new_sp = %p\r\n", new_sp);
+}
+
+void
 md_switch(struct pcb *old_pcb, struct pcb *new_pcb) {
+    printk("old_pcb->sp = %p new_pcb->sp = %p\r\n", old_pcb->sp, new_pcb->sp);
+    printk("new_pcb[x0] = %p\r\n", ((uintptr_t*)(new_pcb->sp))[0]);
+    printk("new_pcb[x1] = %p\r\n", ((uintptr_t*)(new_pcb->sp))[1]);
+    printk("new_pcb[lr] = %p\r\n", ((uintptr_t*)(new_pcb->sp))[30]);
     aarch64_switch(old_pcb, new_pcb);
 }

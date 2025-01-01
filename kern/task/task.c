@@ -113,6 +113,8 @@ mi_switch(enum task_state into_state) {
      * for reasons. */
     struct task *next = scheduler();
 
+    printk("mi_switch: switching to %p state = %d\r\n", next, (int)into_state);
+
     /* Step 2: Remove the current task from RUNNING and put it into its new
      * linked list. Note that we do this after scheduler to try to make it
      * possible to implement a cool easy scheduler but TODO: that doesn't
@@ -134,8 +136,12 @@ mi_switch(enum task_state into_state) {
 
     int spl = splhigh();
 
+    printk("mi_switch: about to perform md_switch\r\n");
+
     /* Step 4: Actually perform the context switch */
     md_switch(&prev->pcb, &curtask->pcb);
+
+    printk("mi_switch: came back from md_switch\r\n");
 
     /* Note that if we are switching to a new thread, md_switch will not return
      * here. So anything we do here must also be done in mi_task_startup. */
@@ -163,6 +169,8 @@ task_exit() {
  */
 void
 mi_task_startup(task_entry_fn fn, void *userdata) {
+    printk("mi_task_startup: task ready to start\r\n");
+    
     /* When we first reach a new task, we need to turn off all interrupts so
      * that it may be preempted. */
     spl0();
