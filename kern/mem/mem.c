@@ -2,6 +2,24 @@
 
 #include <kern/lib.h>
 
+struct frame {
+    /* Linked list of free frames / LRU cache */
+    struct frame *next;
+    struct frame *prev;
+
+
+};
+
+uintptr_t
+alloc_pages(size_t count) {
+    /* Necessary functionality:
+     * 1. Assign virtual address 
+     * 2. Allocate physical frames
+          - Should either already support swapping them to disk, or have a relatively
+            intuitive extension as an assignment.
+     */
+}
+
 /* TODO: Implement real kernel allocator? */
 /* The initial heap must be aligned to 16 bytes for our other alignment logic to work. */
 static char bump_heap[16384] __attribute__((aligned (16)));
