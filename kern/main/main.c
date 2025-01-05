@@ -10,7 +10,13 @@ void load_devices();
 
 void second_task(void *userdata) {
     for(;;) {
-        printk("second task\r\n");
+        printk("B");
+    }
+}
+
+void third_task(void *userdata) {
+    for(;;) {
+        printk("C");
     }
 }
 
@@ -34,7 +40,10 @@ main() {
     struct task *second = task_new();
     task_start(second, second_task, NULL);
 
+    struct task *third = task_new();
+    task_start(third, third_task, NULL);
+
     for(;;) {
-        printk("first task\r\n");
+        printk("A");
     }
 }

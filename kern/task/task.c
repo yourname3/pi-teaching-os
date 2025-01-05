@@ -10,40 +10,74 @@
 struct task *curtask;
 
 /* Define each of the linked lists for the various tasks. */
-static struct task *tasks_ready = NULL;
-static struct task *tasks_running = NULL;
-static struct task *tasks_sleeping = NULL;
-static struct task *tasks_zombie = NULL;
+static struct task_list tasks_ready = { 0 };
+static struct task_list tasks_zombie = { 0 };
 
 static void
-task_unlink_state(struct task *task) {
+task_unlink_from(struct task *task, struct task_list *task_list) {
     assert(task != NULL);
 
-    if(task->state_prev) {
-        task->state_prev->state_next = task->state_next;
+    if(task->list_prev) {
+        task->list_prev->list_next = task->list_next;
     }
 
-    if(task->state_next) {
-        task->state_next->state_prev = task->state_prev;
+    if(task->list_next) {
+        task->list_next->list_prev = task->list_prev;
     }
 
-    task->state_next = NULL;
-    task->state_prev = NULL;
+    if(task_list) {
+        if(task_list->head == task) {
+            task_list->head = task->list_next;
+        }
+        if(task_list->tail == task) {
+            task_list->tail = task->list_prev;
+        }
+    }
+
+    task->list_next = NULL;
+    task->list_prev = NULL;
+}
+
+/* TODO: Consider using a list_head style interface for the linked list. This would have
+ * the following benefits:
+ * - No need to keep track of which list a task is in.
+ * - The implementation of the various enqueue/dequeue functions is much simpler. */
+
+static void
+task_list_move_head(struct task *task, struct task_list *from, struct task_list *to) {
+    assert(task != NULL);
+    assert(to != NULL);
+
+    task_unlink_from(task, from);
+    task->list_next = to->head;
+    if(task->list_next) {
+        task->list_next->list_prev = task;
+    }
+    else {
+        /* If nothing is in the list, also set the tail. */
+        to->tail = task;
+    }
+
+    to->head = task;
+    assert(task->list_prev == NULL);
 }
 
 static void
-task_insert(struct task *task, struct task **list) {
+task_list_move_tail(struct task *task, struct task_list *from, struct task_list *to) {
     assert(task != NULL);
-    assert(list != NULL);
+    assert(to != NULL);
 
-    task_unlink_state(task);
-    task->state_next = *list;
-    if(task->state_next) {
-        task->state_next->state_prev = task;
+    task_unlink_from(task, from);
+    task->list_prev = to->tail;
+    if(task->list_prev) {
+        task->list_prev->list_next = task;
+    }
+    else {
+        to->head = task;
     }
 
-    *list = task;
-    task->state_prev = NULL;
+    to->tail = task;
+    assert(task->list_next == NULL);
 }
 
 struct task*
@@ -60,8 +94,8 @@ task_new() {
         return NULL;
     }
 
-    t->state_next = NULL;
-    t->state_prev = NULL;
+    t->list_next = NULL;
+    t->list_prev = NULL;
     t->state = TS_READY;
 
     /* TODO: Set up stack protector. */
@@ -73,17 +107,17 @@ void
 task_bootstrap() {
     struct task *kmain = kzalloc(sizeof(*kmain));
     kmain->stack = NULL; /* We already have a stack. */
-    kmain->state_next = NULL;
-    kmain->state_prev = NULL;
+    kmain->list_next = NULL;
+    kmain->list_prev = NULL;
     kmain->state = TS_RUNNING;
     
-    task_insert(kmain, &tasks_running);
+    //task_list_move_head(kmain, NULL, &tasks_running);
     curtask = kmain;
 }
 
 void
 task_start(struct task *t, task_entry_fn fn, void *userdata) {
-    task_insert(t, &tasks_ready);
+    task_list_move_head(t, NULL, &tasks_ready);
     md_init_new_task_pcb(&t->pcb, (uintptr_t)t->stack, fn, userdata);
 }
 
@@ -92,15 +126,15 @@ int nexttask = 0;
 struct task*
 scheduler() {
     /* Simple round-robin... */
-    return tasks_ready;
+    return tasks_ready.head;
 }
 
-struct task**
-task_state_to_link(enum task_state state) {
+struct task_list*
+task_state_to_list(enum task_state state) {
     switch(state) {
         case TS_READY: return &tasks_ready;
-        case TS_RUNNING: return &tasks_running;
-        case TS_SLEEPING: return &tasks_sleeping;
+        case TS_RUNNING: panic("cannot pass TS_RUNNING to task_state_to_list\n");
+        case TS_SLEEPING: panic("cannot pass TS_SLEEPING to task_state_to_list\n");
         case TS_ZOMBIE: return &tasks_zombie;
         default:
             panic("invalid task_state %d\n", state);
@@ -118,7 +152,7 @@ mi_switch(enum task_state into_state) {
      * possible to implement a cool easy scheduler but TODO: that doesn't
      * actually work */
     assert(into_state != TS_RUNNING);
-    task_insert(curtask, task_state_to_link(into_state));
+    task_list_move_tail(curtask, NULL, task_state_to_list(into_state));
 
     /* If there is no new task, default to the current. TODO implement idle
      * task. */
@@ -128,11 +162,12 @@ mi_switch(enum task_state into_state) {
      * new tasks will not return here and will not otherwise have a chance to 
      * do it. */
 
+    int spl = splhigh();
+
     struct task *prev = curtask;
     curtask = next;
-    task_unlink_state(curtask);
-
-    int spl = splhigh();
+    /* The current task is in the ready list, due to being obtained from the scheduler. */
+    task_unlink_from(curtask, &tasks_ready);
 
     /* Step 4: Actually perform the context switch */
     md_switch(&prev->pcb, &curtask->pcb);

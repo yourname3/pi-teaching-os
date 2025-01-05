@@ -27,10 +27,13 @@ struct task {
      * keeping one linked list per state, and then having every task exist
      * in exactly ONE of those linked lists at a time.
      * 
-     * Therefore, state_next and state_prev keep track of those links.
+     * Therefore, list_next and list_prev keep track of those links.
+     * 
+     * When a task is sleeping, it is simply placed onto a separate list,
+     * passed to task_sleep and task_wakeall.
      */
-    struct task *state_next;
-    struct task *state_prev;
+    struct task *list_next;
+    struct task *list_prev;
 
     enum task_state state;
 
@@ -39,12 +42,23 @@ struct task {
     char *stack;
 };
 
+struct task_list {
+    struct task *head;
+    struct task *tail;
+};
+
+/* TODO: Implement spinlocks */
+struct spinlock;
+
 extern struct task *curtask;
 
 typedef void (*task_entry_fn)(void*);
 
 struct task *task_new();
 void task_start(struct task *t, task_entry_fn fn, void *userdata);
+
+void task_sleep(struct task *task, struct task_list *sleep_list, struct spinlock *spinlock);
+void task_wakeall(struct task_list *sleep_list);
 
 void mi_task_startup(task_entry_fn fn, void *userdata);
 
