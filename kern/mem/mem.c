@@ -52,6 +52,18 @@ struct address_space {
 }
 
 uintptr_t
+kmmap(struct address_space *space, void *desired_ptr, size_t length, int prot, int flags, struct file *file, size_t offset) {
+    /**
+     * kmmap: core memory mapping API for the kernel?
+     * Lets us:
+     * - allocate virtual memory
+     * - map specific virtual addresses
+     * - map physical MMIO addresses into our address space
+     * - handle file mmap'ing
+     * - implement the mmap syscall? */
+}
+
+uintptr_t
 alloc_pages(struct address_space *space, size_t count) {
     /* Necessary functionality:
      * 1. Assign virtual address 
