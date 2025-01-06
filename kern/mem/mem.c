@@ -2,6 +2,31 @@
 
 #include <kern/lib.h>
 
+/**
+ * More of a sketch of the memory system:
+ * - struct frame: contains information about a physical page, e.g.
+ *   is it allocated, how many things reference it, who owns (?) it
+ *   Note: In order to e.g. swap a page out, we would have to invalidate
+ *   that page in EVERY page table that references it. Storing only one
+ *   guy is not enough. Maybe we could do something like have each
+ *   virtual_address_range keep track of COW'd virtual_address_ranges?
+ *   In that case, a page invalidation would be able to locate other
+ *   ranges that might also need invalidating.
+ * 
+ * - struct virtual_address_range: keeps track "only" of how a virtual address
+ *   space is divied up. This doesn't track any information about how this
+ *   address range is mapped to physical pages.
+ *
+ * - struct page_table: architecture-specific page table. Usually just refers
+ *   to a literal page table on that architecture. A architecture-specific API
+ *   is defined that lets us do things like map the page, set it to read-only,
+ *   etc.
+ *
+ *   Note that there would be one page_table for userspace and one for kernel
+ *   space. This is pretty nice on aarch64 but would likely look a little more
+ *   ugly on x86.
+ */
+
 struct frame {
     /* Linked list of free frames / LRU cache */
     struct frame *next;
@@ -10,14 +35,37 @@ struct frame {
 
 };
 
+struct virtual_address_range {
+    struct virtual_address_range *next;
+    struct virtual_address_range *prev;
+
+    uintptr_t start;
+    uintptr_t end;
+};
+
+struct address_space {
+    uintptr_t start;
+    uintptr_t end;
+    struct virtual_address_range *ranges;
+
+    /* struct page_table *page_table; */
+}
+
 uintptr_t
-alloc_pages(size_t count) {
+alloc_pages(struct address_space *space, size_t count) {
     /* Necessary functionality:
      * 1. Assign virtual address 
      * 2. Allocate physical frames
           - Should either already support swapping them to disk, or have a relatively
             intuitive extension as an assignment.
      */
+
+    uintptr_t start = 0;
+    uintptr_t end = 0;
+    struct 
+    if(!space->ranges) {
+
+    }
 }
 
 /* TODO: Implement real kernel allocator? */
