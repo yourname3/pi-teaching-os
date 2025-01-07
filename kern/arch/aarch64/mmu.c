@@ -39,11 +39,45 @@ static void *allocate_page_table() {
     return cache[cache_top];
 }
 
+extern char kern_text_start;
+extern char kern_text_end;
+
+extern char kern_rodata_start;
+extern char kern_rodata_end;
+
+extern char kern_data_start;
+extern char kern_data_end;
+
+static void
+init_k_map(struct page_table *k_page_table, void *start_ptr, void *end_ptr, int flags) {
+    uintptr_t start = (uintptr_t)start_ptr;
+    uintptr_t end = (uintptr_t)end_ptr;
+
+    size_t page_count = ((end + PAGE_SIZE - 1) - start) / PAGE_SIZE;
+    for(size_t i = 0; i < page_count; ++i) {
+        /* The way we've set up the kernel image, the physical address of each kernel page is
+         * simply its virtual address minus the 0xFFFF000000000000 value. */
+        mmu_map(k_page_table, start, start - 0xFFFF000000000000, flags);
+    }
+}
+
 void
 mmu_init() {
+    /* Set up some initial page table objects we can allocate for mapping the kernel. */
     for(size_t i = 0; i < CACHE_SIZE; ++i) {
         cache[i] = init_table_cache + 4096 * i;
     }
+
+    struct page_table *k_page_table = allocate_page_table();
+
+    /* Map the kernel code as read-only, executable */
+    init_k_map(k_page_table, &kern_text_start, &kern_text_end, PROT_EXEC | PROT_READ);
+
+    /* Map the kernel read-only data as read-only (should make the code safer) */
+    init_k_map(k_page_table, &kern_rodata_start, &kern_rodata_end, PROT_READ);
+
+    /* Map everything else as read-write (but not executable). */
+    init_k_map(k_page_table, &kern_data_start, &kern_data_end, PROT_READ | PROT_WRITE);
 }
 
 uint64_t*
@@ -71,6 +105,7 @@ void
 mmu_map(struct page_table *table, uintptr_t virtual_address, uintptr_t physical_address, int flags) {
     /* Find the entry in the page table that we need to map */
     struct page_table *level0 = table;
+    /* Hmm... these pointers need to be physical addresses... */
     struct page_table *level1 = walk_or_create(level0, virtual_address, 39);
     struct page_table *level2 = walk_or_create(level1, virtual_address, 30);
     struct page_table *level3 = walk_or_create(level2, virtual_address, 21);
