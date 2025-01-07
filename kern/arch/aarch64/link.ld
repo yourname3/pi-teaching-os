@@ -33,10 +33,15 @@ SECTIONS
      * exactly where we need it, and then specifying each LMA by subtracting
      * that again, gives the needed results.
      */
+    kern_text_start = .;
     .text.kern : AT(ADDR(.text.kern) - 0xFFFF000000000000) {
         *(.text .text.* .gnu.linkonce.t*)
     }
+    kern_text_end = .;
+    kern_rodata_start = .;
     .rodata : AT(ADDR(.rodata) - 0xFFFF000000000000) { *(.rodata .rodata.* .gnu.linkonce.r*) }
+    kern_rodata_end = .;
+    kern_data_start = .;
     PROVIDE(_data = .);
     .data : AT(ADDR(.data) - 0xFFFF000000000000) {
         *(.data .data.* .gnu.linkonce.d*)
@@ -48,6 +53,7 @@ SECTIONS
         *(COMMON)
         __bss_end = .;
     }
+    kern_data_end = .;
     _end = .;
 
    /DISCARD/ : {

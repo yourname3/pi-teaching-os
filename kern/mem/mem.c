@@ -27,28 +27,14 @@
  *   ugly on x86.
  */
 
-struct frame {
-    /* Linked list of free frames / LRU cache */
-    struct frame *next;
-    struct frame *prev;
+struct frame*
+allocate_frame(struct file *mapped) {
+    return NULL;
+}
 
-
-};
-
-struct virtual_address_range {
-    struct virtual_address_range *next;
-    struct virtual_address_range *prev;
-
-    uintptr_t start;
-    uintptr_t end;
-};
-
-struct address_space {
-    uintptr_t start;
-    uintptr_t end;
-    struct virtual_address_range *ranges;
-
-    /* struct page_table *page_table; */
+struct virtual_address_range*
+new_range(struct address_space *space, void *desired_ptr, size_t length) {
+    return NULL;
 }
 
 uintptr_t
@@ -61,23 +47,16 @@ kmmap(struct address_space *space, void *desired_ptr, size_t length, int prot, i
      * - map physical MMIO addresses into our address space
      * - handle file mmap'ing
      * - implement the mmap syscall? */
-}
+    size_t page_count = (length + PAGE_SIZE - 1) / PAGE_SIZE;
+    
+    struct virtual_address_range *range = new_range(space, desired_ptr, length);
 
-uintptr_t
-alloc_pages(struct address_space *space, size_t count) {
-    /* Necessary functionality:
-     * 1. Assign virtual address 
-     * 2. Allocate physical frames
-          - Should either already support swapping them to disk, or have a relatively
-            intuitive extension as an assignment.
-     */
-
-    uintptr_t start = 0;
-    uintptr_t end = 0;
-    struct 
-    if(!space->ranges) {
-
+    for(size_t i = 0; i < page_count; ++i) {
+        struct frame *frame = allocate_frame(file);
+        mmu_map(space->page_table, range->start + i * PAGE_SIZE, frame->physical_address, flags);
     }
+
+    return range->start;
 }
 
 /* TODO: Implement real kernel allocator? */
