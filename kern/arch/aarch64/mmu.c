@@ -25,12 +25,12 @@
 #define MAIR_IDX6 (6 << 2)
 #define MAIR_IDX7 (7 << 2)
 
-static char init_table_cache[4096 * CACHE_SIZE] __attribute__((aligned(4096)));
+extern char kern_init_pagetable_cache;
 
-static void* cache[CACHE_SIZE];
+static physical_address_t cache[CACHE_SIZE];
 static size_t cache_top = CACHE_SIZE;
 
-static void *allocate_page_table() {
+static physical_address_t allocate_page_table() {
     if(cache_top == 0) {
         panic("aarch64 mmu: ran out of page tables");
     }
@@ -49,7 +49,7 @@ extern char kern_data_start;
 extern char kern_data_end;
 
 static void
-init_k_map(struct page_table *k_page_table, void *start_ptr, void *end_ptr, int flags) {
+init_k_map(pagetable_t k_page_table, void *start_ptr, void *end_ptr, int flags) {
     uintptr_t start = (uintptr_t)start_ptr;
     uintptr_t end = (uintptr_t)end_ptr;
 
@@ -57,18 +57,19 @@ init_k_map(struct page_table *k_page_table, void *start_ptr, void *end_ptr, int 
     for(size_t i = 0; i < page_count; ++i) {
         /* The way we've set up the kernel image, the physical address of each kernel page is
          * simply its virtual address minus the 0xFFFF000000000000 value. */
-        mmu_map(k_page_table, start, start - 0xFFFF000000000000, flags);
+        mmu_map(k_page_table, MAKE_VIRTUAL_ADDRESS(start), MAKE_PHYSICAL_ADDRESS(start - 0xFFFF000000000000), flags);
     }
 }
 
 void
 mmu_init() {
     /* Set up some initial page table objects we can allocate for mapping the kernel. */
+    uintptr_t cache_physaddr = (uintptr_t)&kern_init_pagetable_cache;
     for(size_t i = 0; i < CACHE_SIZE; ++i) {
-        cache[i] = init_table_cache + 4096 * i;
+        cache[i] = MAKE_PHYSICAL_ADDRESS(cache_physaddr + 4096 * i);
     }
 
-    struct page_table *k_page_table = allocate_page_table();
+    pagetable_t k_page_table = allocate_page_table();
 
     /* Map the kernel code as read-only, executable */
     init_k_map(k_page_table, &kern_text_start, &kern_text_end, PROT_EXEC | PROT_READ);
@@ -80,36 +81,40 @@ mmu_init() {
     init_k_map(k_page_table, &kern_data_start, &kern_data_end, PROT_READ | PROT_WRITE);
 }
 
+#define KERNEL_PHYSICAL_BASE 0xffff002000000000
+
 uint64_t*
-walk(struct page_table *table, uintptr_t addr, size_t shift) {
+walk(physical_address_t table, uintptr_t addr, size_t shift) {
     size_t idx = (addr >> shift) & 0x1FF;
-    return& table->mappings[idx]; 
+    /* The virtual address of this physical address inside our address space. */
+    uintptr_t virt_address = KERNEL_PHYSICAL_BASE + table.val + (idx * sizeof(uint64_t));
+    return (uint64_t*)virt_address;
 }
 
-struct page_table*
-walk_or_create(struct page_table* table, uintptr_t addr, size_t shift) {
-    uint64_t *mapping = walk(table, addr, shift);
+physical_address_t
+walk_or_create(physical_address_t table_address, uintptr_t addr, size_t shift) {
+    uint64_t *mapping = walk(table_address, addr, shift);
     if((*mapping & 1) == 0) {
         /* Unmapped - create new page table */
-        struct page_table *result = allocate_page_table();
-        *mapping = ((uint64_t)result | 3); /* Bit pattern for page table pointer is (address | 0b11) */
+        physical_address_t result = allocate_page_table();
+        *mapping = ((uint64_t)result.val | 3); /* Bit pattern for page table pointer is (address | 0b11) */
         return result;
     }
 
     /* Otherwise, we have a page table */
     assert((*mapping & 3) == 3);
-    return (struct page_table*)(*mapping);
+    return MAKE_PHYSICAL_ADDRESS(*mapping);
 }
 
 void
-mmu_map(struct page_table *table, uintptr_t virtual_address, uintptr_t physical_address, int flags) {
+mmu_map(pagetable_t table, virtual_address_t virtual_address, physical_address_t physical_address, int flags) {
     /* Find the entry in the page table that we need to map */
-    struct page_table *level0 = table;
+    physical_address_t level0 = table;
     /* Hmm... these pointers need to be physical addresses... */
-    struct page_table *level1 = walk_or_create(level0, virtual_address, 39);
-    struct page_table *level2 = walk_or_create(level1, virtual_address, 30);
-    struct page_table *level3 = walk_or_create(level2, virtual_address, 21);
-    uint64_t *pte             = walk          (level3, virtual_address, 12);
+    physical_address_t level1 = walk_or_create(level0, virtual_address.val, 39);
+    physical_address_t level2 = walk_or_create(level1, virtual_address.val, 30);
+    physical_address_t level3 = walk_or_create(level2, virtual_address.val, 21);
+    uint64_t *pte             = walk          (level3, virtual_address.val, 12);
 
     /* Create the page flags. */
     uint64_t pte_flags = 0;

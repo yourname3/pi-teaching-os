@@ -15,29 +15,31 @@
 /* Makes the memory nRnEnG on aarch64 */
 #define MEM_MMIO   16
 
-struct aarch64_page_table_level3 {
-    /** These are the actual virtual->physical mappings on 4K granularity. */
-    uint64_t mappings[512];
-};
+typedef struct virtual_address_t {
+    uintptr_t val;
+} virtual_address_t;
 
-struct aarch64_page_table_level2 {
-    /** These are addresses of level3 page tables, plus associated flags. */
-    uint64_t mappings[512];
-};
+typedef struct physical_address_t {
+    uintptr_t val;
+} physical_address_t;
 
-struct aarch64_page_table_level1 {
-    /** These are addresses of level2 page tables, plus associated flags. */
-    uint64_t mappings[512];
-};
+#define MAKE_VIRTUAL_ADDRESS(value) ((struct virtual_address_t){ .val = (uintptr_t)value })
+#define MAKE_PHYSICAL_ADDRESS(value) ((struct physical_address_t){ .val = (uintptr_t)value })
 
 struct page_table {
     /** These are addresses of level1 page tables, plus associated flags. */
-    uint64_t mappings[512];
+    physical_address_t mappings[512];
 };
+
+/** 
+ * On aarch64, the pagetable_t type is simply a pointer to the level 0 page table.
+ * Because such a pointer must be a physical address, use the relevant typedef.
+ */
+typedef physical_address_t pagetable_t;
 
 struct address_space; /* Defined by mem/mem.h */
 
 void mmu_init();
-void mmu_map(struct page_table *table, uintptr_t virtual_address, uintptr_t physical_address, int flags);
+void mmu_map(pagetable_t table, virtual_address_t virtual_address, physical_address_t physical_address, int flags);
 
 #endif

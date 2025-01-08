@@ -53,7 +53,7 @@ kmmap(struct address_space *space, void *desired_ptr, size_t length, int prot, i
 
     for(size_t i = 0; i < page_count; ++i) {
         struct frame *frame = allocate_frame(file);
-        mmu_map(space->page_table, range->start + i * PAGE_SIZE, frame->physical_address, flags);
+        mmu_map(space->page_table, MAKE_VIRTUAL_ADDRESS(range->start + i * PAGE_SIZE), MAKE_PHYSICAL_ADDRESS(frame->physical_address), flags);
     }
 
     return range->start;

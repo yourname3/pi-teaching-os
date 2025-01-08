@@ -18,6 +18,10 @@ SECTIONS
 
     .data.boot : ALIGN(4K) { KEEP(*(.data.boot)) }
 
+    kern_init_pagetable_cache = .;
+
+    . += 0x40000; /* 64 page tables */
+
     . += 0xFFFF000000000000;
 
     /**

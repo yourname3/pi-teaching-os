@@ -36,7 +36,7 @@ struct address_space {
 
     struct virtual_address_range *range_list;
 
-    struct page_table *page_table;
+    pagetable_t page_table;
 };
 
 void *kzalloc(size_t size);
