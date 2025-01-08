@@ -13,6 +13,10 @@ _init_pagetable_level0:
     .quad 3
     .zero 8 * (512 - 1)
 
+.balign 0x1000
+_physmap_pagetable_level1:
+    .zero 8 * 512 * 256
+
 .section .data
 .balign 0x1000
 _init_kstack_bottom:
@@ -106,6 +110,9 @@ in_el1:
 
     ldr x0, =_init_pagetable_level0
     str x1, [x0]
+    
+    /* TODO: Fill the page tables in _physmap_pagetable_level1 and then put them in the latter 256 entries
+     * in _init_pagetable_level0 */
    
     ldr x0, =_init_pagetable_level0
     ldr x1, =((0b101 << 32) | (2 << 30) | (3 << 28) | (1 << 26) | (1 << 24) | (16 << 16) | (0 << 14) | (3 << 12) | (1 << 10) | (1 << 8) | (16))
