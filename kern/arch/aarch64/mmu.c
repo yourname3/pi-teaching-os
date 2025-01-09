@@ -84,7 +84,7 @@ mmu_init() {
 
     /* Install the new map */
     asm volatile (
-        "\n\tmsr ttbr1_el1, x0"
+        "\n\tmsr ttbr1_el1, %0"
         "\n\tdsb ishst" // armv8-a address translation" page 28
         "\n\ttlbi vmalle1" // notes... tlbi alle1 does not work, vmalle1 does work... (but seems to be hypervisor related)
                            // TODO: Is this correct?
