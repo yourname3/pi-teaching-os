@@ -25,8 +25,8 @@ void third_task(void *userdata) {
  * Machine-independent kernel entry point. Should be called by the boot code.
  */
 void
-main() {    
-    mmu_init();
+main(struct physical_memory_map *memory_map) {    
+    mmu_init(memory_map);
 
     /* Must initialize IRQ subsystem before we load devices. This is because
      * the devices will almost certainly register some IRQs. */

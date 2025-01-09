@@ -15,6 +15,7 @@ _init_pagetable_level0:
 _init_pagetable_level0_end:
 
 .balign 0x1000
+.global _physmap_pagetable_level1
 _physmap_pagetable_level1:
     .zero 8 * 512 * 256
 _physmap_pagetable_end:

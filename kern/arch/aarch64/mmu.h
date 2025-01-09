@@ -39,7 +39,13 @@ typedef physical_address_t pagetable_t;
 
 struct address_space; /* Defined by mem/mem.h */
 
-void mmu_init();
+struct physical_memory_map {
+    physical_address_t *start;
+    physical_address_t *end;
+    size_t count;
+};
+
+void mmu_init(struct physical_memory_map *memory_map);
 void mmu_map(pagetable_t table, virtual_address_t virtual_address, physical_address_t physical_address, int flags);
 
 #endif

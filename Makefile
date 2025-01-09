@@ -36,6 +36,7 @@ SRCS = \
 	kern/arch/aarch64/trap.c \
 	kern/arch/aarch64/spl.c \
 	kern/arch/aarch64/mmu.c \
+	kern/arch/aarch64/boot.c \
 	kern/mem/mem.c \
 	kern/task/task.c \
 	kern/main/main.c \

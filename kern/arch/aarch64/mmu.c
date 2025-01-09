@@ -48,6 +48,8 @@ extern char kern_rodata_end;
 extern char kern_data_start;
 extern char kern_data_end;
 
+extern char _physmap_pagetable_level1;
+
 static void
 init_k_map(pagetable_t k_page_table, void *start_ptr, void *end_ptr, int flags) {
     uintptr_t start = (uintptr_t)start_ptr;
@@ -63,8 +65,15 @@ init_k_map(pagetable_t k_page_table, void *start_ptr, void *end_ptr, int flags) 
     }
 }
 
+#define KERNEL_PHYSICAL_BASE 0xFFFF800000000000
+static uint64_t*
+logical_map(uint64_t ptr) {
+    uintptr_t virt_address = KERNEL_PHYSICAL_BASE + ptr;
+    return (uint64_t*)virt_address;
+}
+
 void
-mmu_init() {
+mmu_init(struct physical_memory_map *memory_map) {
     /* Set up some initial page table objects we can allocate for mapping the kernel. */
     uintptr_t cache_physaddr = (uintptr_t)&kern_init_pagetable_cache;
     for(size_t i = 0; i < CACHE_SIZE; ++i) {
@@ -82,6 +91,13 @@ mmu_init() {
     /* Map everything else as read-write (but not executable). */
     init_k_map(k_page_table, &kern_data_start, &kern_data_end, PROT_READ | PROT_WRITE);
 
+    for(size_t i = 0; i < 256; ++i) {
+        /* Map the logical map onto the latter 256 entries */
+        uint64_t physmap_ptr = (uint64_t)&_physmap_pagetable_level1;
+        uint64_t *ptr = logical_map(k_page_table.val + (256 + i) * 8);
+        *ptr = (physmap_ptr + 4096 * i) | 3;
+    }
+
     /* Install the new map */
     asm volatile (
         "\n\tmsr ttbr1_el1, %0"
@@ -94,14 +110,11 @@ mmu_init() {
     );
 }
 
-#define KERNEL_PHYSICAL_BASE 0xFFFF800000000000
-
 uint64_t*
 walk(physical_address_t table, uintptr_t addr, size_t shift) {
     size_t idx = (addr >> shift) & 0x1FF;
     /* The virtual address of this physical address inside our address space. */
-    uintptr_t virt_address = KERNEL_PHYSICAL_BASE + table.val + (idx * sizeof(uint64_t));
-    return (uint64_t*)virt_address;
+    return logical_map(table.val + (idx * sizeof(uint64_t)));
 }
 
 physical_address_t
