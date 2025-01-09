@@ -111,7 +111,7 @@ logical_map(uint64_t ptr) {
 }
 
 static void
-init_mem_map(struct physical_memory_map *src) {
+init_mem_map(pagetable_t k_page_table, struct physical_memory_map *src) {
     size_t frame_count = 0;
     size_t area_count = src->count;
 
@@ -126,6 +126,42 @@ init_mem_map(struct physical_memory_map *src) {
 
     uintptr_t alloc_end = ((frame_array_start + frame_count * sizeof(struct frame) + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
 
+    /* Map the memory we want into our address space. This is essentially allocating it. */
+    // TODO: Allocate each frame of our new memory using allocate_page_table(), then 
+    // map each of those frames into our address space with mmu_map.
+    // init_k_map(k_page_table, (void*)mem_map_start, (void*)alloc_end, PROT_READ | PROT_WRITE);
+
+    asm volatile (
+        "\n\tdsb ishst"
+        "\n\ttlbi vmalle1"
+        "\n\tdsb ish"
+        : : : "memory"
+    );
+
+    mem_map = (struct phys_area*)mem_map_start;
+    mem_map_size = area_count;
+
+    struct frame *all_frames = (struct frame*)frame_array_start;
+
+    size_t frame_idx = 0;
+
+    for(size_t i = 0; i < src->count; ++i) {
+        size_t page_count = (src->end[i].val - src->start[i].val + PAGE_SIZE - 1) / PAGE_SIZE;
+
+        mem_map[i].start = src->start[i];
+        mem_map[i].end   = src->end[i];
+
+        mem_map[i].map = all_frames + frame_idx;
+        mem_map[i].map_size = page_count;
+
+        for(size_t j = 0; j < page_count; ++j) {
+            mem_map[i].map[j].next = NULL;
+            mem_map[i].map[j].prev = NULL;
+            mem_map[i].map[j].physical_address = mem_map[i].start.val + j * PAGE_SIZE;
+            mem_map[i].map[j].range = NULL;
+            mem_map[i].map[j].file = NULL;
+        }
+    }
 }
 
 void
@@ -164,6 +200,8 @@ mmu_init(struct physical_memory_map *memory_map) {
         "\n\tisb" 
         : : "r" (k_page_table.val) : "memory"
     );
+
+    init_mem_map(k_page_table, memory_map);
 }
 
 uint64_t*
