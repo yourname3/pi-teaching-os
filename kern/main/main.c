@@ -58,9 +58,9 @@ main() {
     //task_start(second, second_task, NULL);
 
     //struct task *third = task_new();
-   // task_start(third, third_task, NULL);
+    //task_start(third, third_task, NULL);
 
     for(;;) {
-       // printk("A");
+       //printk("A");
     }
 }
