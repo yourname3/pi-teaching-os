@@ -67,6 +67,9 @@ static inline void
 load_ttbr1_el1(uint64_t value) {
     asm volatile(
         "\n\tmsr ttbr1_el1, %0"
+        "\n\tdsb ishst" // "armv8-a address translation" page 28
+        //"\n\ttlbi alle1is" // note: apparently invalidating the tlb here doesn't work?
+        "\n\tdsb ish"
         "\n\tisb"
         : : "r" (value) : "memory");
 }
@@ -99,9 +102,9 @@ mmu_init() {
 
     // TEST CODE: write a simple page table just like in boot.S
     // This checks whether load_ttbr1_el1 seems to work.
-    // pagetable_t test_page_table = allocate_page_table();
-    // phys_write(test_page_table.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
-    // phys_write(k_page_table.val, test_page_table.val | 3);
+    pagetable_t test_page_table = allocate_page_table();
+    phys_write(test_page_table.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
+    phys_write(k_page_table.val, test_page_table.val | 3);
 
     /* Install the new map */
     load_ttbr1_el1(k_page_table.val);
