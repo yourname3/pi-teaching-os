@@ -109,15 +109,13 @@ mmu_init() {
     pagetable_t test_page_table3 = allocate_page_table();
     size_t phys_addr_pte = 0;
     for(size_t i = 0; i < 512; ++i) {
-        phys_write(test_page_table3.val + i * 8, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 | phys_addr_pte);
+        /* CRITICALLY IMPORTANT: The level 3 table entries are also or'd with 3, rather than with 1. */
+        phys_write(test_page_table3.val + i * 8, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | phys_addr_pte | 3);
         phys_addr_pte += 4096;
     }
-    phys_write(test_page_table2.val,  AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1); // setting this one up to point to AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 seems to work..
+    phys_write(test_page_table2.val,  test_page_table3.val | 3); // setting this one up to point to AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 seems to work..
     
-    phys_write(test_page_table2.val + 8, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1); /* NOTE: New debug strat: Try running a level 3 page table that isn't critical to the kernel functioning. */
-    phys_write(test_page_table2.val + 16, test_page_table3.val | 3);
-    phys_write(test_page_table2.val + 24, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 3);
-    phys_write(test_page_table2.val + 32, test_page_table3.val | 3);
+    phys_write(test_page_table2.val + 8, test_page_table3.val | 3); /* NOTE: New debug strat: Try running a level 3 page table that isn't critical to the kernel functioning. */
 
     phys_write(test_page_table1.val, test_page_table2.val | 3);
     //phys_write(test_page_table1.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
@@ -126,7 +124,7 @@ mmu_init() {
     /* Install the new map */
     aarch64_load_ttbr1_el1_tlb_trampoline(k_page_table.val);
 
-    uint64_t test_addr = 0xffff000000000000 + 0x400000; //0x5c4000;
+    uint64_t test_addr = 0xffff000000000000 + 0x200000; //0x5c4000;
     uint64_t *ptr = (uint64_t*)test_addr;
     *ptr = 3;
 }
