@@ -175,5 +175,5 @@ mmu_map(pagetable_t table, virtual_address_t virtual_address, physical_address_t
     }
 
     /* Always set the AF flag, otherwise we fault; always set as inner shareable. */
-    *pte = physical_address.val | pte_flags | AF | SH_INNER_SHAREABLE;
+    *pte = physical_address.val | pte_flags | AF | SH_INNER_SHAREABLE | 1;
 }
