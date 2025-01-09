@@ -21,19 +21,11 @@ void third_task(void *userdata) {
     }
 }
 
-extern char kern_text_start;
-extern char kern_text_end;
-
-
-extern void miniuart_init();
-
 /**
  * Machine-independent kernel entry point. Should be called by the boot code.
  */
 void
-main() {
-    miniuart_init();
-    
+main() {    
     mmu_init();
 
     /* Must initialize IRQ subsystem before we load devices. This is because
@@ -44,7 +36,7 @@ main() {
 
     load_devices();
 
-    printk("Welcome to the kernel. text = %p - %p\n", &kern_text_start, &kern_text_end);
+    printk("Welcome to the kernel.\n");
     device_print_all();
     printk("kern> \n");
     
