@@ -43,8 +43,8 @@ main() {
     const char *some_str = "hello world";
     uintptr_t vaddr = (uintptr_t)some_str;
     uintptr_t paddr   = vaddr - 0xFFFF000000000000;
-    uintptr_t logaddr = paddr + 0xFFFF004000000000;
-    printk("memory map check: some_str = %p. physical addr = %p. plus 0xFFFF004000000000 = %p.\r\n", some_str, paddr, logaddr);
+    uintptr_t logaddr = paddr + 0xFFFF800000000000;
+    printk("memory map check: some_str = %p. physical addr = %p. plus 0xFFFF800000000000 = %p.\r\n", some_str, paddr, logaddr);
     printk("value at some_str = %s\r\n", vaddr);
     printk("value at the logical map = %s\r\n", logaddr);
 
