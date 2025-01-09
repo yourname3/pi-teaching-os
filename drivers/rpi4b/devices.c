@@ -46,7 +46,7 @@ extern void wdog_init();
 
 void
 load_devices() {
-    miniuart_init();
+    //miniuart_init();
 
     gic_400_init(0x40000000 + (0xFF840000 - 0xC0000000), 32 + 96);
     //gic_400_assign_irq_cpu(30, 0);

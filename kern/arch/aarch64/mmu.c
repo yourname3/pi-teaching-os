@@ -63,16 +63,18 @@ init_k_map(pagetable_t k_page_table, void *start_ptr, void *end_ptr, int flags) 
     }
 }
 
-static inline void
+/*static inline void
 load_ttbr1_el1(uint64_t value) {
     asm volatile(
         "\n\tmsr ttbr1_el1, %0"
         "\n\tdsb ishst" // "armv8-a address translation" page 28
-        //"\n\ttlbi alle1is" // note: apparently invalidating the tlb here doesn't work?
+        "\n\ttlbi alle1is" // note: apparently invalidating the tlb here doesn't work?
         "\n\tdsb ish"
         "\n\tisb"
         : : "r" (value) : "memory");
-}
+}*/
+
+extern void aarch64_load_ttbr1_el1_tlb_trampoline(uint64_t value);
 
 static void
 phys_write(uint64_t phys_addr, uint64_t value) {
@@ -110,13 +112,13 @@ mmu_init() {
         phys_write(test_page_table3.val + i * 8, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 | phys_addr_pte);
         phys_addr_pte += 4096;
     }
-    phys_write(test_page_table2.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1); // setting this one up to point to AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 seems to work..
+    phys_write(test_page_table2.val,  AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1); // setting this one up to point to AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 seems to work..
     phys_write(test_page_table1.val, test_page_table2.val | 3);
     //phys_write(test_page_table1.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
     phys_write(k_page_table.val, test_page_table1.val | 3);
 
     /* Install the new map */
-    load_ttbr1_el1(k_page_table.val);
+    aarch64_load_ttbr1_el1_tlb_trampoline(k_page_table.val);
 }
 
 #define KERNEL_PHYSICAL_BASE 0xFFFF800000000000

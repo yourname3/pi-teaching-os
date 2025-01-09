@@ -24,11 +24,15 @@ void third_task(void *userdata) {
 extern char kern_text_start;
 extern char kern_text_end;
 
+
+extern void miniuart_init();
+
 /**
  * Machine-independent kernel entry point. Should be called by the boot code.
  */
 void
 main() {
+    miniuart_init();
     
     mmu_init();
 
