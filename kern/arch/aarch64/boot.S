@@ -16,6 +16,7 @@ _init_pagetable_level0:
 .balign 0x1000
 _physmap_pagetable_level1:
     .zero 8 * 512 * 256
+_physmap_pagetable_end:
 
 .section .data
 .balign 0x1000
@@ -113,6 +114,27 @@ in_el1:
     
     /* TODO: Fill the page tables in _physmap_pagetable_level1 and then put them in the latter 256 entries
      * in _init_pagetable_level0 */
+    // Load x0 with the pointer to the page tables.
+    ldr x0, =_physmap_pagetable_level1
+    ldr x1, =0xFFFF004000000000
+
+load_physmap:
+    // Flags for each physically mapped page: kernel read/write, inner shared, regular memory.
+    ldr x2, =(1 | (1 << 10) | (3 << 8))
+    // Set up the entry.
+    orr x2, x2, x1
+    // Store the entry in the physmap table.
+    str x2, [x0]
+
+    // Increment the pointer to the physmap table.
+    add x0, x0, #8
+    // Increment the physical offset.
+    add x1, x1, #0x200000
+    // If the pointer is past the page table, we're done, otherwise keep looping.
+    ldr x2, =_physmap_pagetable_end
+    subs xzr, x1, x2
+    // Branch back to the loop.
+    //blt load_physmap
    
     ldr x0, =_init_pagetable_level0
     ldr x1, =((0b101 << 32) | (2 << 30) | (3 << 28) | (1 << 26) | (1 << 24) | (16 << 16) | (0 << 14) | (3 << 12) | (1 << 10) | (1 << 8) | (16))

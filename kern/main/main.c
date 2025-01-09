@@ -29,7 +29,7 @@ extern char kern_text_end;
  */
 void
 main() {
-    mmu_init();
+    //mmu_init();
 
     /* Must initialize IRQ subsystem before we load devices. This is because
      * the devices will almost certainly register some IRQs. */
