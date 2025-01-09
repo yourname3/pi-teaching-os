@@ -125,6 +125,10 @@ mmu_init() {
 
     /* Install the new map */
     aarch64_load_ttbr1_el1_tlb_trampoline(k_page_table.val);
+
+    uint64_t test_addr = 0xffff000000000000 + 0x400000; //0x5c4000;
+    uint64_t *ptr = (uint64_t*)test_addr;
+    *ptr = 3;
 }
 
 #define KERNEL_PHYSICAL_BASE 0xFFFF800000000000

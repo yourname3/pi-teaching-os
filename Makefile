@@ -101,7 +101,7 @@ clean:
 	rm -f kernel8.elf
 
 qemu: kernel8.img
-	$(QEMU) -machine raspi4b -kernel kernel8.elf -serial null -serial stdio
+	$(QEMU) -machine raspi4b -kernel kernel8.elf -serial null -serial stdio # -d int,guest_errors,mmu
 
 qemu-debug: kernel8.img
 	$(QEMU) -s -S -machine raspi4b -kernel kernel8.elf -serial null -serial stdio

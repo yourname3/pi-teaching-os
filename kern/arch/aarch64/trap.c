@@ -80,7 +80,7 @@ aarch64_trapentry(struct trapframe *tf) {
         printk(" ");
     }
     
-    printk("ESR = %p\n", tf->esr);
+    printk("\n\nESR = %p\n", tf->esr);
 
     printk("\nESR_EL1 = %p ELR_EL1 = %p\nSPSR_EL1 = %p FAR_EL1 = %p",
         tf->esr, tf->elr, tf->spsr, tf->far);
