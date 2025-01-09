@@ -235,7 +235,7 @@ high_code:
     // Enable all exceptions
     msr daifclr, #0xF
 
-    // Jump to our main() routine in C (make sure it doesn't return)
-4:  bl      main
+    // Jump to our aarch64_boot() routine in C (make sure it doesn't return)
+4:  bl      aarch64_boot
     // In case it does return, halt the main core too
     b       1b

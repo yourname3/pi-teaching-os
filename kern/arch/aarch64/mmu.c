@@ -26,12 +26,38 @@
 #define MAIR_IDX6 (6 << 2)
 #define MAIR_IDX7 (7 << 2)
 
-extern char kern_init_pagetable_cache;
-
 static physical_address_t cache[CACHE_SIZE];
 static size_t cache_top = CACHE_SIZE;
 
+static struct physical_memory_map *early_page_table_alloc_src = NULL;
+static uint64_t early_page_table_alloc_last = 0;
+
 static physical_address_t allocate_page_table() {
+    /* If we're early in the physical page allocation, then we can find physical
+     * addresses by walking through the values in this array until we see one
+     * that is available. */
+    if(early_page_table_alloc_src) {
+        size_t candidate = early_page_table_alloc_last + 4096;
+
+        size_t i = 0;
+        for(;;) {
+            if(candidate + PAGE_SIZE - 1 < early_page_table_alloc_src->end[i].val) {
+                /* This candidate is good -- use it */
+                early_page_table_alloc_last = candidate;
+                return MAKE_PHYSICAL_ADDRESS(candidate);
+            }
+
+            /* Otherwise, we need to move the candidate to the start of the next
+             * physical memory area. */
+            i += 1;
+            if(i >= early_page_table_alloc_src->count) {
+                panic("aarch64 mmu: could not allocate early physical frames");
+            }
+
+            candidate = early_page_table_alloc_src->start[i].val;
+        }
+    }
+
     if(cache_top == 0) {
         panic("aarch64 mmu: ran out of page tables");
     }
@@ -104,11 +130,11 @@ init_mem_map(struct physical_memory_map *src) {
 
 void
 mmu_init(struct physical_memory_map *memory_map) {
-    /* Set up some initial page table objects we can allocate for mapping the kernel. */
-    uintptr_t cache_physaddr = (uintptr_t)&kern_init_pagetable_cache;
-    for(size_t i = 0; i < CACHE_SIZE; ++i) {
-        cache[i] = MAKE_PHYSICAL_ADDRESS(cache_physaddr + 4096 * i);
-    }
+    /* In order to allocate page tables early, we start by trying physical pages placed
+     * after the end of the kernel. It is possible there is some physical memory before
+     * the kernel, but there should almost certainly be some afterwards. */
+    early_page_table_alloc_last = (uint64_t)&_end - PAGE_SIZE - 0xffff000000000000;
+    early_page_table_alloc_src = memory_map;
 
     pagetable_t k_page_table = allocate_page_table();
 
