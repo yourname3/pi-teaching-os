@@ -81,7 +81,7 @@ mmu_init() {
     init_k_map(k_page_table, &kern_data_start, &kern_data_end, PROT_READ | PROT_WRITE);
 }
 
-#define KERNEL_PHYSICAL_BASE 0xffff002000000000
+#define KERNEL_PHYSICAL_BASE 0xFFFF800000000000
 
 uint64_t*
 walk(physical_address_t table, uintptr_t addr, size_t shift) {
