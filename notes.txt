@@ -1,2 +1,8 @@
 curcpu/curtask: we should be able to use gcc -ffixed-reg and then just reserve a register
 to always point to curcpu.
+
+apparently there are ldtr and sttr instructions that can be used to load/store "as if"
+in el0. we could change our setup like so:
+- identity map the entire 48 bit address space in ttrb0_el0
+- require use of copyin/copyout to access userspace--implemented using these ldtr and
+  sdtr instructions.
