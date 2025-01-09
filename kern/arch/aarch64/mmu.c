@@ -63,26 +63,6 @@ init_k_map(pagetable_t k_page_table, void *start_ptr, void *end_ptr, int flags) 
     }
 }
 
-/*static inline void
-load_ttbr1_el1(uint64_t value) {
-    asm volatile(
-        "\n\tmsr ttbr1_el1, %0"
-        "\n\tdsb ishst" // "armv8-a address translation" page 28
-        "\n\ttlbi alle1is" // note: apparently invalidating the tlb here doesn't work?
-        "\n\tdsb ish"
-        "\n\tisb"
-        : : "r" (value) : "memory");
-}*/
-
-extern void aarch64_load_ttbr1_el1_tlb_trampoline(uint64_t value);
-
-static void
-phys_write(uint64_t phys_addr, uint64_t value) {
-    uint64_t addr = phys_addr + 0xFFFF800000000000;
-    uint64_t *ptr = (uint64_t*)addr;
-    *ptr = value;
-}
-
 void
 mmu_init() {
     /* Set up some initial page table objects we can allocate for mapping the kernel. */
@@ -103,7 +83,15 @@ mmu_init() {
     init_k_map(k_page_table, &kern_data_start, &kern_data_end, PROT_READ | PROT_WRITE);
 
     /* Install the new map */
-    aarch64_load_ttbr1_el1_tlb_trampoline(k_page_table.val);
+    asm volatile (
+        "\n\tmsr ttbr1_el1, x0"
+        "\n\tdsb ishst" // armv8-a address translation" page 28
+        "\n\ttlbi vmalle1" // notes... tlbi alle1 does not work, vmalle1 does work... (but seems to be hypervisor related)
+                           // TODO: Is this correct?
+        "\n\tdsb ish"
+        "\n\tisb" 
+        : : "r" (k_page_table.val) : "memory"
+    );
 }
 
 #define KERNEL_PHYSICAL_BASE 0xFFFF800000000000

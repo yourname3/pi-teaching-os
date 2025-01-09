@@ -188,32 +188,6 @@ load_physmap2:
 ready:
     b high_code
 
-// Define a special function for flushing the TLB when we're setting up the initial real page
-// tables.
-// - We can't call tlbi while executing code relevant to the current translation.
-// - But, early in the kernel boot, the lower memory is all identity mapped.
-// - So, we can put this function in the identity map, and safely flush the TLB. 
-.global aarch64_load_ttbr1_el1_tlb_trampoline
-aarch64_load_ttbr1_el1_tlb_trampoline:
-    // First, disable memory mapping completely. This should be OK because we're
-    // identity mapped.
-    //mrs x1, sctlr_el1 // Read System Control Register
-    //and x1, x1, #~1 // Set [M] bit and enable the MMU.
-    //msr sctlr_el1, x1 // Write System Control Register
-    //isb
-
-    msr ttbr1_el1, x0
-    dsb ishst // armv8-a address translation" page 28
-    tlbi vmalle1 // notes... tlbi alle1 does not work, vmalle1 does work... (but seems to be hypervisor related)
-    dsb ish
-    isb
-
-    //mrs x1, sctlr_el1 // Read System Control Register
-    //orr x1, x1, #1 // Set [M] bit and enable the MMU.
-    //msr sctlr_el1, x1 // Write System Control Register
-    //isb
-    ret
-
 #define GICC_CTRLR	0x0
 #define GICC_PMR	0x4
 #define IT_NR		0x8	// Number of interrupt enable registers (256 total irqs)
