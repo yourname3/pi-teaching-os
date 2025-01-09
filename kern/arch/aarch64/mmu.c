@@ -1,6 +1,7 @@
 #include "mmu.h"
 
 #include <kern/lib.h>
+#include <kern/mem/mem.h>
 
 #define CACHE_SIZE 64
 
@@ -49,6 +50,17 @@ extern char kern_data_start;
 extern char kern_data_end;
 
 extern char _physmap_pagetable_level1;
+extern char _end;
+
+struct phys_area {
+    physical_address_t start;
+    physical_address_t end;
+    struct frame *map;
+    size_t map_size;
+};
+
+struct phys_area *mem_map = NULL;
+size_t mem_map_size = 0;
 
 static void
 init_k_map(pagetable_t k_page_table, void *start_ptr, void *end_ptr, int flags) {
@@ -70,6 +82,24 @@ static uint64_t*
 logical_map(uint64_t ptr) {
     uintptr_t virt_address = KERNEL_PHYSICAL_BASE + ptr;
     return (uint64_t*)virt_address;
+}
+
+static void
+init_mem_map(struct physical_memory_map *src) {
+    size_t frame_count = 0;
+    size_t area_count = src->count;
+
+    for(size_t i = 0; i < src->count; ++i) {
+        size_t page_count = (src->end[i].val - src->start[i].val + PAGE_SIZE - 1) / PAGE_SIZE;
+        frame_count += page_count;
+    }
+
+    uintptr_t mem_map_start = (uintptr_t)&_end;
+    assert(mem_map_start % PAGE_SIZE == 0);
+    uintptr_t frame_array_start = ((mem_map_start + area_count * sizeof(struct phys_area) + 16 - 1) / 16) * 16;
+
+    uintptr_t alloc_end = ((frame_array_start + frame_count * sizeof(struct frame) + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
+
 }
 
 void

@@ -66,6 +66,8 @@ SECTIONS
         __bss_end = .;
     }
     kern_data_end = .;
+
+    . = ALIGN(4096);
     _end = .;
 
    /DISCARD/ : {
