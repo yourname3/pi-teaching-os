@@ -1,0 +1,2 @@
+curcpu/curtask: we should be able to use gcc -ffixed-reg and then just reserve a register
+to always point to curcpu.
