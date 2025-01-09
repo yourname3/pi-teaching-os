@@ -132,9 +132,9 @@ load_physmap:
     add x1, x1, #0x200000
     // If the pointer is past the page table, we're done, otherwise keep looping.
     ldr x2, =_physmap_pagetable_end
-    subs xzr, x1, x2
-    // Branch back to the loop.
-    //blt load_physmap
+    subs xzr, x0, x2
+    // Branch back to the loop if x0 < x2
+    blt load_physmap
    
     ldr x0, =_init_pagetable_level0
     ldr x1, =((0b101 << 32) | (2 << 30) | (3 << 28) | (1 << 26) | (1 << 24) | (16 << 16) | (0 << 14) | (3 << 12) | (1 << 10) | (1 << 8) | (16))
