@@ -51,13 +51,15 @@ extern char kern_data_end;
 static void
 init_k_map(pagetable_t k_page_table, void *start_ptr, void *end_ptr, int flags) {
     uintptr_t start = (uintptr_t)start_ptr;
+    assert(start % 4096 == 0);
     uintptr_t end = (uintptr_t)end_ptr;
 
     size_t page_count = ((end + PAGE_SIZE - 1) - start) / PAGE_SIZE;
     for(size_t i = 0; i < page_count; ++i) {
+        size_t page_addr = start + i * 4096;
         /* The way we've set up the kernel image, the physical address of each kernel page is
          * simply its virtual address minus the 0xFFFF000000000000 value. */
-        mmu_map(k_page_table, MAKE_VIRTUAL_ADDRESS(start), MAKE_PHYSICAL_ADDRESS(start - 0xFFFF000000000000), flags);
+        mmu_map(k_page_table, MAKE_VIRTUAL_ADDRESS(page_addr), MAKE_PHYSICAL_ADDRESS(page_addr - 0xFFFF000000000000), flags);
     }
 }
 
@@ -97,9 +99,9 @@ mmu_init() {
 
     // TEST CODE: write a simple page table just like in boot.S
     // This checks whether load_ttbr1_el1 seems to work.
-    pagetable_t test_page_table = allocate_page_table();
-    phys_write(test_page_table.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
-    phys_write(k_page_table.val, test_page_table.val | 3);
+    // pagetable_t test_page_table = allocate_page_table();
+    // phys_write(test_page_table.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
+    // phys_write(k_page_table.val, test_page_table.val | 3);
 
     /* Install the new map */
     load_ttbr1_el1(k_page_table.val);
@@ -127,7 +129,8 @@ walk_or_create(physical_address_t table_address, uintptr_t addr, size_t shift) {
 
     /* Otherwise, we have a page table */
     assert((*mapping & 3) == 3);
-    return MAKE_PHYSICAL_ADDRESS(*mapping);
+    /* Clear the last two bits of the mapping, as they aren't actually part of the address. */
+    return MAKE_PHYSICAL_ADDRESS(*mapping & ~3);
 }
 
 void
@@ -155,11 +158,11 @@ mmu_map(pagetable_t table, virtual_address_t virtual_address, physical_address_t
     /* Check executable */
     if(!(flags & PROT_EXEC)) {
         /* Make sure memory is not executable unless necessary. */
-        pte_flags |= UXN;
-        pte_flags |= PXN;
+    //    pte_flags |= UXN;
+    //    pte_flags |= PXN;
     }
     if(kernel_only) {
-        pte_flags |= UXN;
+    //    pte_flags |= UXN;
     }
 
     if(flags & MEM_MMIO) {
