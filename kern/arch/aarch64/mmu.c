@@ -113,6 +113,12 @@ mmu_init() {
         phys_addr_pte += 4096;
     }
     phys_write(test_page_table2.val,  AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1); // setting this one up to point to AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 seems to work..
+    
+    phys_write(test_page_table2.val + 8, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1); /* NOTE: New debug strat: Try running a level 3 page table that isn't critical to the kernel functioning. */
+    phys_write(test_page_table2.val + 16, test_page_table3.val | 3);
+    phys_write(test_page_table2.val + 24, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 3);
+    phys_write(test_page_table2.val + 32, test_page_table3.val | 3);
+
     phys_write(test_page_table1.val, test_page_table2.val | 3);
     //phys_write(test_page_table1.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
     phys_write(k_page_table.val, test_page_table1.val | 3);

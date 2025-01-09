@@ -203,9 +203,9 @@ aarch64_load_ttbr1_el1_tlb_trampoline:
     //isb
 
     msr ttbr1_el1, x0
-    //dsb ishst // armv8-a address translation" page 28
-    //tlbi alle1 // notes... tlbi alle1 does not work, vmalle1 does work... (but seems to be hypervisor related)
-    //dsb ish
+    dsb ishst // armv8-a address translation" page 28
+    tlbi vmalle1 // notes... tlbi alle1 does not work, vmalle1 does work... (but seems to be hypervisor related)
+    dsb ish
     isb
 
     //mrs x1, sctlr_el1 // Read System Control Register
