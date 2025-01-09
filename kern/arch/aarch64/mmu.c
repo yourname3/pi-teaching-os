@@ -126,10 +126,11 @@ init_mem_map(pagetable_t k_page_table, struct physical_memory_map *src) {
 
     uintptr_t alloc_end = ((frame_array_start + frame_count * sizeof(struct frame) + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
 
-    /* Map the memory we want into our address space. This is essentially allocating it. */
-    // TODO: Allocate each frame of our new memory using allocate_page_table(), then 
-    // map each of those frames into our address space with mmu_map.
-    // init_k_map(k_page_table, (void*)mem_map_start, (void*)alloc_end, PROT_READ | PROT_WRITE);
+    /* Map the memory we want into our address space by allocating it one page at a time. */
+    for(uintptr_t ptr = mem_map_start; ptr < alloc_end; ptr += PAGE_SIZE) {
+        physical_address_t phys_page = allocate_page_table();
+        mmu_map(k_page_table, MAKE_VIRTUAL_ADDRESS(ptr), phys_page, PROT_READ | PROT_WRITE);
+    }
 
     asm volatile (
         "\n\tdsb ishst"
