@@ -43,6 +43,12 @@ main() {
     printk("Welcome to the kernel. text = %p - %p\n", &kern_text_start, &kern_text_end);
     device_print_all();
     printk("kern> \n");
+    
+    char *testdata = (char*)"test const string";
+    printk("test string = %s\n", testdata);
+    printk("performing write...\n");
+    testdata[0] = 'b';
+    printk("test string = %s\n", testdata);
 
     //struct task *second = task_new();
     //task_start(second, second_task, NULL);
