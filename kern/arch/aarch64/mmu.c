@@ -69,6 +69,13 @@ load_ttbr1_el1(uint64_t value) {
         : : "r" (value) : "memory");
 }
 
+static void
+phys_write(uint64_t phys_addr, uint64_t value) {
+    uint64_t addr = phys_addr + 0xFFFF800000000000;
+    uint64_t *ptr = (uint64_t*)addr;
+    *ptr = value;
+}
+
 void
 mmu_init() {
     /* Set up some initial page table objects we can allocate for mapping the kernel. */
@@ -87,6 +94,12 @@ mmu_init() {
 
     /* Map everything else as read-write (but not executable). */
     init_k_map(k_page_table, &kern_data_start, &kern_data_end, PROT_READ | PROT_WRITE);
+
+    // TEST CODE: write a simple page table just like in boot.S
+    // This checks whether load_ttbr1_el1 seems to work.
+    pagetable_t test_page_table = allocate_page_table();
+    phys_write(test_page_table.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
+    phys_write(k_page_table.val, test_page_table.val | 3);
 
     /* Install the new map */
     load_ttbr1_el1(k_page_table.val);
@@ -159,5 +172,5 @@ mmu_map(pagetable_t table, virtual_address_t virtual_address, physical_address_t
     }
 
     /* Always set the AF flag, otherwise we fault; always set as inner shareable. */
-    *pte = pte_flags | AF | SH_INNER_SHAREABLE;
+    *pte = physical_address.val | pte_flags | AF | SH_INNER_SHAREABLE;
 }
