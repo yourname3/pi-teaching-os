@@ -12,6 +12,7 @@ _init_pagetable_level0:
     /* .quad 3 | (1 << 10) | (3 << 8) */
     .quad 3
     .zero 8 * (512 - 1)
+_init_pagetable_level0_end:
 
 .balign 0x1000
 _physmap_pagetable_level1:
@@ -116,7 +117,7 @@ in_el1:
      * in _init_pagetable_level0 */
     // Load x0 with the pointer to the page tables.
     ldr x0, =_physmap_pagetable_level1
-    ldr x1, =0xFFFF004000000000
+    ldr x1, =0
 
 load_physmap:
     // Flags for each physically mapped page: kernel read/write, inner shared, regular memory.
@@ -135,6 +136,26 @@ load_physmap:
     subs xzr, x0, x2
     // Branch back to the loop if x0 < x2
     blt load_physmap
+
+    ldr x0, =_init_pagetable_level0 + 8 * 256 // Halfway through the page table.
+    ldr x1, =_physmap_pagetable_level1
+load_physmap2:
+    // Flags for each block: it's a block (0b11 at end).
+    ldr x2, =0b11
+    // Set up the entry.
+    orr x2, x2, x1
+    // Store the entry in the level 0 table.
+    str x2, [x0]
+
+    // Increment the pointer in the level 0 table.
+    add x0, x0, #8
+    // Increment the pointer to the next level 1 page.
+    add x1, x1, #4096
+    // If the level 0 pointer is past the page table, we're done, otherwise keep looping.
+    ldr x2, =_init_pagetable_level0_end
+    subs xzr, x0, x2
+    // Branch back to the loop if x0 < x2
+    blt load_physmap2
    
     ldr x0, =_init_pagetable_level0
     ldr x1, =((0b101 << 32) | (2 << 30) | (3 << 28) | (1 << 26) | (1 << 24) | (16 << 16) | (0 << 14) | (3 << 12) | (1 << 10) | (1 << 8) | (16))

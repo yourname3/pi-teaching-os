@@ -29,6 +29,7 @@ extern char kern_text_end;
  */
 void
 main() {
+    
     //mmu_init();
 
     /* Must initialize IRQ subsystem before we load devices. This is because
@@ -38,6 +39,14 @@ main() {
     task_bootstrap();
 
     load_devices();
+
+    const char *some_str = "hello world";
+    uintptr_t vaddr = (uintptr_t)some_str;
+    uintptr_t paddr   = vaddr - 0xFFFF000000000000;
+    uintptr_t logaddr = paddr + 0xFFFF004000000000;
+    printk("memory map check: some_str = %p. physical addr = %p. plus 0xFFFF004000000000 = %p.\r\n", some_str, paddr, logaddr);
+    printk("value at some_str = %s\r\n", vaddr);
+    printk("value at the logical map = %s\r\n", logaddr);
 
     printk("Welcome to the kernel. text = %p - %p\n", &kern_text_start, &kern_text_end);
     device_print_all();
