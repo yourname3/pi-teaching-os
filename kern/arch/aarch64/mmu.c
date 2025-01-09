@@ -102,9 +102,18 @@ mmu_init() {
 
     // TEST CODE: write a simple page table just like in boot.S
     // This checks whether load_ttbr1_el1 seems to work.
-    pagetable_t test_page_table = allocate_page_table();
-    phys_write(test_page_table.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
-    phys_write(k_page_table.val, test_page_table.val | 3);
+    pagetable_t test_page_table1 = allocate_page_table();
+    pagetable_t test_page_table2 = allocate_page_table();
+    pagetable_t test_page_table3 = allocate_page_table();
+    size_t phys_addr_pte = 0;
+    for(size_t i = 0; i < 512; ++i) {
+        phys_write(test_page_table3.val + i * 8, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 | phys_addr_pte);
+        phys_addr_pte += 4096;
+    }
+    phys_write(test_page_table2.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1); // setting this one up to point to AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1 seems to work..
+    phys_write(test_page_table1.val, test_page_table2.val | 3);
+    //phys_write(test_page_table1.val, AF | SH_INNER_SHAREABLE | MAIR_IDX0 | 1);
+    phys_write(k_page_table.val, test_page_table1.val | 3);
 
     /* Install the new map */
     load_ttbr1_el1(k_page_table.val);
