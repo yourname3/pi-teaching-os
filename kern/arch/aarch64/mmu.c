@@ -61,6 +61,14 @@ init_k_map(pagetable_t k_page_table, void *start_ptr, void *end_ptr, int flags) 
     }
 }
 
+static inline void
+load_ttbr1_el1(uint64_t value) {
+    asm volatile(
+        "\n\tmsr ttbr1_el1, %0"
+        "\n\tisb"
+        : : "r" (value) : "memory");
+}
+
 void
 mmu_init() {
     /* Set up some initial page table objects we can allocate for mapping the kernel. */
@@ -79,6 +87,9 @@ mmu_init() {
 
     /* Map everything else as read-write (but not executable). */
     init_k_map(k_page_table, &kern_data_start, &kern_data_end, PROT_READ | PROT_WRITE);
+
+    /* Install the new map */
+    load_ttbr1_el1(k_page_table.val);
 }
 
 #define KERNEL_PHYSICAL_BASE 0xFFFF800000000000
