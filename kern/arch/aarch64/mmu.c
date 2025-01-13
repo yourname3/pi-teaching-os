@@ -36,7 +36,12 @@ static uint64_t early_page_table_alloc_last = 0;
 struct {
     struct frame *next;
     struct frame *prev;
-} free_frames;
+} free_frames; /* Frames that are free to be used */
+
+struct {
+    struct frame *next;
+    struct frame *prev;
+} page_table_frames; /* Frames allocated for use in page tables */
 
 static physical_address_t allocate_page_table() {
     /* If we're early in the physical page allocation, then we can find physical
@@ -117,6 +122,51 @@ logical_map(uint64_t ptr) {
 }
 
 static void
+walk_pages(pagetable_t page_table, void (*callback)(physical_address_t phys_addr)) {
+    for(size_t i = 0; i < 256; ++i) { // Outermost loop: Walk over 512 GB regions
+        uint64_t p0 = *logical_map(page_table.val + i * 8);
+        if(p0 & 1) {
+            for(size_t j = 0; j < 512; ++j) { // Walk over 1GB regions
+                uint64_t p1 = *logical_map((p0 & ~0xfff) + j * 8);
+                if(p1 & 1) {
+                    for(size_t k = 0; k < 512; ++k) { // Walk over 2MB regions
+                        uint64_t p2 = *logical_map((p1 & ~0xfff) + k * 8);
+                        if(p2 & 1) {
+                            for(size_t l = 0; l < 512; ++l) { // Walk over 4K regions
+                                uint64_t p3 = *logical_map((p2 & ~0xfff) + l * 8);
+                                if(p3 & 1) {
+                                    // If it's valid, then it's an address. Mask off everything else.
+                                    uint64_t addr = p3 & ~(0xfff | UXN | PXN);
+                                    callback(MAKE_PHYSICAL_ADDRESS(addr));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct frame*
+physaddr_to_frame(physical_address_t phys_addr) {
+    for(size_t i = 0; i < mem_map_size; ++i) {
+        if(phys_addr.val >= mem_map[i].start.val && phys_addr.val < mem_map[i].end.val) {
+            // No need to check inner size.
+            return &mem_map[i].map[phys_addr.val >> 12];
+        }
+    }
+    return NULL;
+}
+
+static void
+init_own_page(physical_address_t used) {
+    struct frame *used_frame = physaddr_to_frame(used);
+    ll_unlink(used_frame);
+    ll_insert(&page_table_frames, used_frame);
+}
+
+static void
 init_mem_map(pagetable_t k_page_table, struct physical_memory_map *src) {
     size_t frame_count = 0;
     size_t area_count = src->count;
@@ -173,6 +223,8 @@ init_mem_map(pagetable_t k_page_table, struct physical_memory_map *src) {
             ll_insert(&free_frames, &mem_map[i].map[j]);
         }
     }
+
+    walk_pages(k_page_table, &init_own_page);
 }
 
 void
