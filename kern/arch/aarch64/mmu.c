@@ -2,6 +2,7 @@
 
 #include <kern/lib.h>
 #include <kern/mem/mem.h>
+#include <kern/lib/linked_list.h>
 
 #define CACHE_SIZE 64
 
@@ -31,6 +32,11 @@ static size_t cache_top = CACHE_SIZE;
 
 static struct physical_memory_map *early_page_table_alloc_src = NULL;
 static uint64_t early_page_table_alloc_last = 0;
+
+struct {
+    struct frame *next;
+    struct frame *prev;
+} free_frames;
 
 static physical_address_t allocate_page_table() {
     /* If we're early in the physical page allocation, then we can find physical
@@ -146,6 +152,8 @@ init_mem_map(pagetable_t k_page_table, struct physical_memory_map *src) {
 
     size_t frame_idx = 0;
 
+    ll_init(&free_frames);
+
     for(size_t i = 0; i < src->count; ++i) {
         size_t page_count = (src->end[i].val - src->start[i].val + PAGE_SIZE - 1) / PAGE_SIZE;
 
@@ -161,6 +169,8 @@ init_mem_map(pagetable_t k_page_table, struct physical_memory_map *src) {
             mem_map[i].map[j].physical_address = mem_map[i].start.val + j * PAGE_SIZE;
             mem_map[i].map[j].range = NULL;
             mem_map[i].map[j].file = NULL;
+
+            ll_insert(&free_frames, &mem_map[i].map[j]);
         }
     }
 }
