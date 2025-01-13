@@ -36,6 +36,8 @@ main(struct physical_memory_map *memory_map) {
 
     load_devices();
 
+    mmu_dump();
+
     printk("Welcome to the kernel.\n");
     device_print_all();
     printk("kern> \n");

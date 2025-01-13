@@ -48,4 +48,6 @@ struct physical_memory_map {
 void mmu_init(struct physical_memory_map *memory_map);
 void mmu_map(pagetable_t table, virtual_address_t virtual_address, physical_address_t physical_address, int flags);
 
+void mmu_dump();
+
 #endif

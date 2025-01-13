@@ -227,6 +227,19 @@ init_mem_map(pagetable_t k_page_table, struct physical_memory_map *src) {
     walk_pages(k_page_table, &init_own_page);
 }
 
+static pagetable_t k_page_table;
+
+void
+mmu_dump_page(physical_address_t phys_addr) {
+    struct frame *frame = physaddr_to_frame(phys_addr);
+    printk("page %p : frame object %p - %p\n", phys_addr.val, frame, frame->physical_address);
+}
+
+void
+mmu_dump() {
+    walk_pages(k_page_table, mmu_dump_page);
+}
+
 void
 mmu_init(struct physical_memory_map *memory_map) {
     /* In order to allocate page tables early, we start by trying physical pages placed
@@ -235,7 +248,7 @@ mmu_init(struct physical_memory_map *memory_map) {
     early_page_table_alloc_last = (uint64_t)&_end - PAGE_SIZE - 0xffff000000000000;
     early_page_table_alloc_src = memory_map;
 
-    pagetable_t k_page_table = allocate_page_table();
+    k_page_table = allocate_page_table();
 
     /* Map the kernel code as read-only, executable */
     init_k_map(k_page_table, &kern_text_start, &kern_text_end, PROT_EXEC | PROT_READ);
